@@ -2,8 +2,8 @@ use futures::future::select;
 use tokio::pin;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::oneshot;
+use uuid::Uuid;
 use warp::Filter;
-use warp::http::StatusCode;
 
 use std::str::FromStr;
 use std::net::{SocketAddr, Ipv6Addr};
@@ -28,11 +28,15 @@ pub async fn main() {
         Ok(port) => u16::from_str_radix(&port, 10).unwrap(),
         Err(_) => DEFAULT_PORT
     };
+    let pid = Uuid::new_v4();
     let (tx, rx) = oneshot::channel();
     tokio::task::spawn(signal_handler(tx));
-    let route = warp::any().and_then(|| async {
-        Err::<StatusCode, _>(warp::reject::not_found())
+
+    let route = warp::get().map(move || {
+        let request_id = Uuid::new_v4();
+        format!("ProcessId={} RequestId={}", pid, request_id)
     });
+
     let (addr, server) = warp::serve(route).bind_with_graceful_shutdown(
         SocketAddr::new(Ipv6Addr::from_str("::").unwrap().into(), port),
         async {

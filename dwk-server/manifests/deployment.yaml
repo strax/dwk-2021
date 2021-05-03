@@ -13,4 +13,4 @@ spec:
     spec:
       containers:
         - name: dwk-server
-          image: eu.gcr.io/strax-dwk/dwk-server@sha256:b4ba71528536bcd425382570d73cce227530ad9fe4b2dc941f34cc6105558d00
+          image: eu.gcr.io/strax-dwk/dwk-server@sha256:c49b9f507684082428a1c55811e5d6509021983038264003505048eeb4ab3057
