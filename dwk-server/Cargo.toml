@@ -9,3 +9,4 @@ edition = "2018"
 [dependencies]
 tokio = { version = "1", features = ["full"] }
 uuid = { version = "0.8", features = ["v4"] }
+warp = "0.3"
