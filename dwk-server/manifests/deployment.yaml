@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: dwk-server-dep
+spec:
+  selector:
+    matchLabels:
+      app: dwk-server
+  template:
+    metadata:
+      labels:
+        app: dwk-server
+    spec:
+      containers:
+        - name: dwk-server
+          image: eu.gcr.io/strax-dwk/dwk-server@sha256:b4ba71528536bcd425382570d73cce227530ad9fe4b2dc941f34cc6105558d00
