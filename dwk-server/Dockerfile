@@ -18,6 +18,7 @@ COPY --from=cacher $CARGO_HOME $CARGO_HOME
 RUN cargo build --release --bin dwk-server
 
 FROM gcr.io/distroless/cc AS runtime
+EXPOSE 80
 WORKDIR /tmp
 COPY --from=builder /build/target/release/dwk-server /
 CMD ["/dwk-server"]

@@ -3,12 +3,11 @@ kind: Service
 metadata:
   name: dwk-server-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: dwk-server
   ports:
     - name: http
-      nodePort: 30080
+      port: 80
       protocol: TCP
-      port: 1234
       targetPort: 80
