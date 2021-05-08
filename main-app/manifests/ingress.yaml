@@ -10,6 +10,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: dwk-server-svc
+                name: main-app-svc
                 port:
                   name: http

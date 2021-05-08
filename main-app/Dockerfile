@@ -15,11 +15,11 @@ WORKDIR /build
 COPY . .
 COPY --from=cacher /build/target target
 COPY --from=cacher $CARGO_HOME $CARGO_HOME
-RUN cargo build --release --bin dwk-server
+RUN cargo build --release --bin main-app
 
 FROM gcr.io/distroless/cc AS runtime
 EXPOSE 80
 WORKDIR /tmp
-COPY --from=builder /build/target/release/dwk-server /
-CMD ["/dwk-server"]
+COPY --from=builder /build/target/release/main-app /
+CMD ["/main-app"]
 

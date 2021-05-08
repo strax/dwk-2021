@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: main-app-dep
+spec:
+  selector:
+    matchLabels:
+      app: main-app
+  template:
+    metadata:
+      labels:
+        app: main-app
+    spec:
+      containers:
+        - name: main-app
+          image: eu.gcr.io/strax-dwk/main-app@sha256:42f185113b5956206a0858601067497e05451d35451c04e9ecedd301fe246bd2
