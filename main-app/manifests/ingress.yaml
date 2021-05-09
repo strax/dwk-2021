@@ -1,15 +1,29 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
 metadata:
-  name: ingress
+  name: pingpong-stripprefix
 spec:
-  rules:
-    - http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: main-app-svc
-                port:
-                  name: http
+  stripPrefix:
+    prefixes:
+      - /pingpong
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: ingressroute
+spec:
+  entryPoints:
+    - web
+  routes:
+    - match: PathPrefix(`/pingpong`)
+      kind: Rule
+      services:
+        - name: pingpong-svc
+          port: 80
+      middlewares:
+        - name: pingpong-stripprefix
+    - match: PathPrefix(`/`)
+      kind: Rule
+      services:
+        - name: main-app-svc
+          port: 80

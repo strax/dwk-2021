@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pingpong-dep
+spec:
+  selector:
+    matchLabels:
+      app: pingpong
+  template:
+    metadata:
+      labels:
+        app: pingpong
+    spec:
+      containers:
+        - name: pingpong
+          image: eu.gcr.io/strax-dwk/pingpong@sha256:8852e7d36f9f17eb828ff1b69b70c181cc86d0bb39a51f8850b48a01f7755841
