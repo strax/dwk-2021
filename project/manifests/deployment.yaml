@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-frontend-dep
+spec:
+  selector:
+    matchLabels:
+      app: project
+  template:
+    metadata:
+      labels:
+        app: project
+    spec:
+      containers:
+        - name: project-frontend
+          image: eu.gcr.io/strax-dwk/project-frontend@sha256:5e58474627cf2f8cc0c029bbcc69de7fcf1d2ee586e4d95b52e4d1f6d057e5b9
