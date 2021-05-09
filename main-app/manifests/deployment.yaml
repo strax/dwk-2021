@@ -11,6 +11,17 @@ spec:
       labels:
         app: main-app
     spec:
+      volumes:
+        - name: storage
+          emptyDir: {}
       containers:
-        - name: main-app
-          image: eu.gcr.io/strax-dwk/main-app@sha256:42f185113b5956206a0858601067497e05451d35451c04e9ecedd301fe246bd2
+        - name: main-app-producer
+          image: eu.gcr.io/strax-dwk/main-app-producer@sha256:6a17dc15cd8f88d7dc37b2d5a2ebe36144dab86bdac51191505307f104ed1654
+          volumeMounts:
+            - name: storage
+              mountPath: /mnt/storage
+        - name: main-app-consumer
+          image: eu.gcr.io/strax-dwk/main-app-consumer@sha256:6f468371bceae000d30c8e140a2864de4e53e5bd002633935bd9d8796e37d2ee
+          volumeMounts:
+            - name: storage
+              mountPath: /mnt/storage
