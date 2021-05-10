@@ -1,5 +1,7 @@
 use warp::Filter;
 use std::sync::{Arc, atomic::{Ordering, AtomicU64}};
+use tokio::fs;
+use tracing::error;
 
 #[derive(Debug, Default)]
 pub struct State {
@@ -28,6 +30,11 @@ mod handlers {
 
     pub async fn ping(state: Arc<State>) -> Result<impl warp::Reply, Infallible> {
         let counter = state.counter.fetch_add(1, Ordering::SeqCst);
+        tokio::spawn(async move {
+            if let Err(err) = fs::write("/mnt/storage/counter", counter.to_string()).await {
+                error!("{}", err.to_string());
+            }
+        });
         Ok(format!("pong {}", counter))
     }
 }

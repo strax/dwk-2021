@@ -12,16 +12,13 @@ spec:
         app: main-app
     spec:
       volumes:
-        - name: storage
-          emptyDir: {}
+        - name: pingpong-storage
+          persistentVolumeClaim:
+            claimName: pingpong-pvc
+            readOnly: true
       containers:
-        - name: main-app-producer
-          image: eu.gcr.io/strax-dwk/main-app-producer@sha256:6a17dc15cd8f88d7dc37b2d5a2ebe36144dab86bdac51191505307f104ed1654
+        - name: main-app
+          image: eu.gcr.io/strax-dwk/main-app@sha256:d844e214e2a7801db1d6c956bcb8332e19cf9588342703d75914e287ebef0cb5
           volumeMounts:
-            - name: storage
-              mountPath: /mnt/storage
-        - name: main-app-consumer
-          image: eu.gcr.io/strax-dwk/main-app-consumer@sha256:6f468371bceae000d30c8e140a2864de4e53e5bd002633935bd9d8796e37d2ee
-          volumeMounts:
-            - name: storage
-              mountPath: /mnt/storage
+            - mountPath: /mnt/storage
+              name: pingpong-storage
