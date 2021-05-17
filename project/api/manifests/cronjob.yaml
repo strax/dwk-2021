@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: project-image-updater-cronjob
 spec:
-  schedule: "* * * * *"
+  schedule: "@daily"
   jobTemplate:
     spec:
       template:
