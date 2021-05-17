@@ -1,0 +1,26 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: project-image-updater-cronjob
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          volumes:
+            - name: project-storage
+              persistentVolumeClaim:
+                claimName: project-pvc
+          containers:
+            - name: project-image-updater
+              image: eu.gcr.io/google-containers/toolbox
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - curl https://picsum.photos/1200 -L -o /mnt/volume1/image.jpeg
+              volumeMounts:
+                - mountPath: /mnt/volume1
+                  name: project-storage
+          restartPolicy: OnFailure

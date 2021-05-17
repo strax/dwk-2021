@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: project-api-deployment
+spec:
+  selector:
+    matchLabels:
+      app: project-api
+  template:
+    metadata:
+      labels:
+        app: project-api
+    spec:
+      volumes:
+        - name: project-storage
+          persistentVolumeClaim:
+            claimName: project-pvc
+            readOnly: true
+      containers:
+      - name: project-api
+        image: eu.gcr.io/strax-dwk/project-api@sha256:7f31907f76eb058f0bf27364070f22f5b17e21f5ad502d893347ecb7175a07a8
+        volumeMounts:
+          - mountPath: /mnt/volume1
+            name: project-storage

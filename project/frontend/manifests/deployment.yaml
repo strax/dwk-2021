@@ -13,4 +13,4 @@ spec:
     spec:
       containers:
         - name: project-frontend
-          image: eu.gcr.io/strax-dwk/project-frontend@sha256:5e58474627cf2f8cc0c029bbcc69de7fcf1d2ee586e4d95b52e4d1f6d057e5b9
+          image: eu.gcr.io/strax-dwk/project-frontend@sha256:d32f9f8d24bbc78dc294ff742f48587163a061c1a5213fb1b3290600e05082c9
