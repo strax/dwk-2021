@@ -5,12 +5,16 @@ use uuid::Uuid;
 use warp::Filter;
 use futures::TryFutureExt;
 use tracing::error;
+use tonic::transport::Channel;
+use tonic::Request;
+use tokio::sync::Mutex;
+use std::sync::Arc;
 
 #[derive(Debug, Serialize)]
 struct ResponseEnvelope {
     ts: DateTime<Utc>,
     request_id: Uuid,
-    pingpongs: u64
+    pings: u64
 }
 
 pub mod routes {
@@ -21,16 +25,23 @@ pub mod routes {
     struct InternalServerError;
     impl warp::reject::Reject for InternalServerError {}
 
-    #[inline]
-    pub fn status() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
-        warp::get()
-            .and_then(|| async {
-                let request_id = Uuid::new_v4();
-                let pingpongs: u64 = fs::read_to_string("/mnt/storage/counter").await?.parse()?;
-                Ok::<_, Box<dyn Error>>(warp::reply::json(&ResponseEnvelope { ts: Utc::now(), request_id, pingpongs }))
-            }.map_err(|err| {
-                error!("{}", err);
-                warp::reject::custom(InternalServerError)
-            }))
+    pub fn status(pingpong_client: Arc<Mutex<crate::pingpong::Client<Channel>>>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+        warp::get().and_then(move || handlers::status(pingpong_client.clone()))
+    }
+}
+
+pub mod handlers {
+    use super::*;
+
+    pub async fn status(pingpong_client: Arc<Mutex<crate::pingpong::Client<Channel>>>) -> Result<impl warp::Reply, std::convert::Infallible> {
+        let request_id = Uuid::new_v4();
+
+        let response = async {
+            let mut client = pingpong_client.lock().await;
+            client.get_stats(Request::new(())).await.unwrap().into_inner()
+        }.await;
+
+        let response = format!("{}: {}\nPing / Pongs: {}", Utc::now(), request_id, response.pings);
+        Ok(response)
     }
 }

@@ -11,3 +11,7 @@ spec:
       port: 80
       protocol: TCP
       targetPort: 80
+    - name: grpc
+      port: 50051
+      protocol: TCP
+      targetPort: 50051

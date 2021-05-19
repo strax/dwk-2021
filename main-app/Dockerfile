@@ -11,6 +11,7 @@ COPY --from=planner /build/recipe.json recipe.json
 RUN cargo chef cook --release --recipe-path recipe.json
 
 FROM rust AS builder
+RUN rustup component add rustfmt
 WORKDIR /build
 COPY . .
 COPY --from=cacher /build/target target

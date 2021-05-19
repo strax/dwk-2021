@@ -1,10 +1,11 @@
 use futures::future::select;
 use tokio::pin;
 use tokio::signal::unix::{signal, SignalKind};
-use tokio::sync::oneshot;
+use tokio::sync::watch;
 use tracing::{info, Level};
 use tracing_subscriber::{EnvFilter};
 use warp::Filter;
+use tonic::transport::Server as GrpcServer;
 
 use std::str::FromStr;
 use std::net::{SocketAddr, IpAddr};
@@ -12,10 +13,11 @@ use std::env;
 use std::sync::{Arc};
 
 mod app;
+mod grpc;
 
 const DEFAULT_PORT: u16 = 80;
 
-async fn signal_handler(notification: oneshot::Sender<()>) {
+async fn signal_handler(notification: watch::Sender<()>) {
     let mut sigint = signal(SignalKind::interrupt()).unwrap();
     let sigint = sigint.recv();
     let mut sigterm = signal(SignalKind::terminate()).unwrap();
@@ -36,19 +38,28 @@ pub async fn main() {
         Ok(port) => u16::from_str_radix(&port, 10).unwrap(),
         Err(_) => DEFAULT_PORT
     };
-    let (tx, rx) = oneshot::channel();
+    let (tx, mut rx) = watch::channel(());
     tokio::task::spawn(signal_handler(tx));
 
     let state = Arc::new(app::State::default());
 
-    let routes = app::routes::ping(state.clone()).with(warp::trace::request());
+    let routes = app::routes::ping(state.clone())
+        .or(app::routes::stats(state.clone()))
+        .with(warp::trace::request());
 
-    let (addr, server) = warp::serve(routes)
-        .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async {
-            rx.await.ok();
+    let mut rx2 = rx.clone();
+    let (http_addr, server) = warp::serve(routes)
+        .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async move {
+            rx2.changed().await.ok();
         });
-    let t = tokio::task::spawn(server);
-    info!(%addr, "online");
-    t.await.unwrap();
+    let http = tokio::task::spawn(server);
+    info!(addr = %http_addr, "http.up");
+    let grpc = GrpcServer::builder()
+        .add_service(grpc::PingpongServiceServer::new(grpc::Endpoint::new(state.clone())))
+        .serve_with_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), 50051), async move {
+            rx.changed().await.ok();
+        });
+    info!("grpc.up");
+    futures::future::join(http, grpc).await;
     info!("shutdown");
 }

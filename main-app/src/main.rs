@@ -5,6 +5,8 @@ use tokio::sync::oneshot;
 use tracing::{info, Level};
 use tracing_subscriber::{EnvFilter};
 use warp::Filter;
+use tokio::sync::Mutex;
+use std::sync::Arc;
 
 use std::str::FromStr;
 use std::net::{SocketAddr, IpAddr};
@@ -38,7 +40,8 @@ pub async fn main() {
     let (tx, rx) = oneshot::channel();
     tokio::task::spawn(signal_handler(tx));
 
-    let routes = app::routes::status().with(warp::trace::request());
+    let pingpong_client = pingpong::Client::connect("http://pingpong-svc:50051").await.unwrap();
+    let routes = app::routes::status(Arc::new(Mutex::new(pingpong_client))).with(warp::trace::request());
     let (addr, server) = warp::serve(routes)
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async {
             rx.await.ok();
@@ -47,4 +50,10 @@ pub async fn main() {
     info!(%addr, "online");
     t.await.unwrap();
     info!("shutdown");
+}
+
+mod pingpong {
+    tonic::include_proto!("pingpong");
+
+    pub use pingpong_service_client::PingpongServiceClient as Client;
 }

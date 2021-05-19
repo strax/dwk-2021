@@ -1,11 +1,15 @@
 use warp::Filter;
 use std::sync::{Arc, atomic::{Ordering, AtomicU64}};
-use tokio::fs;
-use tracing::error;
+use serde::Serialize;
 
 #[derive(Debug, Default)]
 pub struct State {
-    counter: AtomicU64
+    pub counter: AtomicU64
+}
+
+#[derive(Serialize)]
+struct StatsResponse {
+    pings: u64
 }
 
 pub fn with_state(state: Arc<State>) -> impl Filter<Extract = (Arc<State>,), Error = std::convert::Infallible> + Clone {
@@ -22,6 +26,14 @@ pub mod routes {
             .and(warp::get())
             .and_then(handlers::ping)
     }
+
+    #[inline]
+    pub fn stats(state: Arc<State>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+        warp::path("stats")
+            .and(with_state(state))
+            .and(warp::get())
+            .and_then(handlers::stats)
+    }
 }
 
 mod handlers {
@@ -30,11 +42,10 @@ mod handlers {
 
     pub async fn ping(state: Arc<State>) -> Result<impl warp::Reply, Infallible> {
         let counter = state.counter.fetch_add(1, Ordering::SeqCst);
-        tokio::spawn(async move {
-            if let Err(err) = fs::write("/mnt/storage/counter", counter.to_string()).await {
-                error!("{}", err.to_string());
-            }
-        });
         Ok(format!("pong {}", counter))
+    }
+
+    pub async fn stats(state: Arc<State>) -> Result<impl warp::Reply, Infallible> {
+        Ok(warp::reply::json(&StatsResponse { pings: state.counter.load(Ordering::SeqCst) }))
     }
 }

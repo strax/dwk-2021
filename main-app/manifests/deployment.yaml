@@ -11,14 +11,6 @@ spec:
       labels:
         app: main-app
     spec:
-      volumes:
-        - name: pingpong-storage
-          persistentVolumeClaim:
-            claimName: pingpong-pvc
-            readOnly: true
       containers:
         - name: main-app
-          image: eu.gcr.io/strax-dwk/main-app@sha256:d844e214e2a7801db1d6c956bcb8332e19cf9588342703d75914e287ebef0cb5
-          volumeMounts:
-            - mountPath: /mnt/storage
-              name: pingpong-storage
+          image: eu.gcr.io/strax-dwk/main-app@sha256:747090156528d3d43bb24bd7fd17ca9faba31a4facf6977ce0ce62aab714b68c
