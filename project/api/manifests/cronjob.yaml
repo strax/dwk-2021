@@ -19,7 +19,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - curl https://picsum.photos/1200 -L -o /mnt/volume1/image.jpeg
+                - curl https://picsum.photos/400/400.webp -L -o /mnt/volume1/picsum-400-400.webp
               volumeMounts:
                 - mountPath: /mnt/volume1
                   name: project-storage

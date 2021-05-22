@@ -1,0 +1,16 @@
+.container {
+  width: 500px;
+  margin: 0 auto;
+  margin-top: 50px;
+  isolation: isolate;
+  padding: 20px;
+  border-radius: 10px;
+  display: grid;
+}
+
+.heroImage {
+  border-radius: 50%;
+  width: 200px;
+  height: 200px;
+  justify-self: center;
+}

@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "noEmit": true,
+    "strict": true,
+    "jsx": "preserve",
+    "incremental": true,
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "importsNotUsedAsValues": "error",
+    "skipLibCheck": true,
+    "assumeChangesOnlyAffectDirectDependencies": true,
+    "types": ["react/experimental", "react-dom/experimental"]
+  },
+  "include": ["src/**/*"]
+}

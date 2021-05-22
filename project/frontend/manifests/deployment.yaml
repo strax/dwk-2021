@@ -5,12 +5,12 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app: project
+      app: project-frontend
   template:
     metadata:
       labels:
-        app: project
+        app: project-frontend
     spec:
       containers:
         - name: project-frontend
-          image: eu.gcr.io/strax-dwk/project-frontend@sha256:d32f9f8d24bbc78dc294ff742f48587163a061c1a5213fb1b3290600e05082c9
+          image: eu.gcr.io/strax-dwk/project-frontend@sha256:839b5da3befac45c133686d67be9d61efc02904dbc9410e72db30cfaf818460c

@@ -1,0 +1,28 @@
+{
+  "devDependencies": {
+    "@babel/core": "7.14.3",
+    "@babel/preset-react": "7.13.13",
+    "@babel/preset-typescript": "7.13.0",
+    "@pmmmwh/react-refresh-webpack-plugin": "0.5.0-beta.8",
+    "@types/react": "17.0.6",
+    "@types/react-dom": "17.0.5",
+    "babel-loader": "8.2.2",
+    "css-loader": "5.2.5",
+    "evergreen-ui": "6.0.1",
+    "html-webpack-plugin": "5.3.1",
+    "mini-css-extract-plugin": "1.6.0",
+    "normalize.css": "8.0.1",
+    "prettier": "2.3.0",
+    "proposal-temporal": "0.8.0",
+    "react": "0.0.0-experimental-459c34fde",
+    "react-dom": "0.0.0-experimental-459c34fde",
+    "react-refresh": "0.10.0",
+    "terser": "5.7.0",
+    "typescript": "4.3.1-rc",
+    "webpack": "5.37.1",
+    "webpack-bundle-analyzer": "4.4.2",
+    "webpack-cli": "4.7.0",
+    "webpack-dev-server": "4.0.0-beta.3",
+    "webpack-subresource-integrity": "1.5.2"
+  }
+}
