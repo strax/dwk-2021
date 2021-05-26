@@ -8,6 +8,13 @@ spec:
       - /api
 ---
 apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: frontend-compress
+spec:
+  compress: {}
+---
+apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
   name: ingressroute
@@ -27,3 +34,5 @@ spec:
       services:
         - name: project-frontend-svc
           port: 80
+      middlewares:
+        - name: frontend-compress
