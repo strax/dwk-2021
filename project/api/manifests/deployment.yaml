@@ -1,24 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: project-api-deployment
+  namespace: dwk-project
+  name: api-dep
 spec:
   selector:
     matchLabels:
-      app: project-api
+      app: api
   template:
     metadata:
       labels:
-        app: project-api
+        app: api
     spec:
       volumes:
-        - name: project-storage
+        - name: volume1
           persistentVolumeClaim:
             claimName: project-pvc
             readOnly: true
       containers:
-      - name: project-api
+      - name: api
         image: eu.gcr.io/strax-dwk/project-api@sha256:ec3dbfe8b188f0eb820e941ce390839f77d71d8f9ba8605acf25c65faee71040
         volumeMounts:
           - mountPath: /mnt/volume1
-            name: project-storage
+            name: volume1

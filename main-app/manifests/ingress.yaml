@@ -1,6 +1,7 @@
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
+  namespace: dwk-exercises
   name: pingpong-stripprefix
 spec:
   stripPrefix:
@@ -10,6 +11,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
+  namespace: dwk-exercises
   name: ingressroute
 spec:
   entryPoints:

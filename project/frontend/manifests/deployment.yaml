@@ -1,16 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: project-frontend-dep
+  namespace: dwk-project
+  name: frontend-dep
 spec:
   selector:
     matchLabels:
-      app: project-frontend
+      app: frontend
   template:
     metadata:
       labels:
-        app: project-frontend
+        app: frontend
     spec:
       containers:
-        - name: project-frontend
+        - name: nginx
           image: eu.gcr.io/strax-dwk/project-frontend@sha256:839b5da3befac45c133686d67be9d61efc02904dbc9410e72db30cfaf818460c

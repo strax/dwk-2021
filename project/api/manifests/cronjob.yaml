@@ -1,7 +1,8 @@
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: project-image-updater-cronjob
+  namespace: dwk-project
+  name: image-updater-cronjob
 spec:
   schedule: "@daily"
   jobTemplate:
@@ -9,7 +10,7 @@ spec:
       template:
         spec:
           volumes:
-            - name: project-storage
+            - name: volume1
               persistentVolumeClaim:
                 claimName: project-pvc
           containers:
@@ -22,5 +23,5 @@ spec:
                 - curl https://picsum.photos/400/400.webp -L -o /mnt/volume1/picsum-400-400.webp
               volumeMounts:
                 - mountPath: /mnt/volume1
-                  name: project-storage
+                  name: volume1
           restartPolicy: OnFailure

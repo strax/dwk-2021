@@ -1,11 +1,12 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: project-frontend-svc
+  namespace: dwk-project
+  name: frontend-svc
 spec:
   type: ClusterIP
   selector:
-    app: project-frontend
+    app: frontend
   ports:
     - name: http
       port: 80
