@@ -1,22 +1,19 @@
-FROM rust AS planner
-RUN cargo install cargo-chef
-WORKDIR /build
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+# syntax=docker/dockerfile:1.2
 
-FROM rust AS cacher
-RUN cargo install cargo-chef
-WORKDIR /build
-COPY --from=planner /build/recipe.json recipe.json
-RUN cargo chef cook --release --recipe-path recipe.json
-
-FROM rust AS builder
+FROM rust:1.52.1-alpine AS builder
 RUN rustup component add rustfmt
+RUN apk add protoc musl-dev --update-cache && \
+    apk add sccache \
+        --update-cache \
+        --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ \
+        --allow-untrusted
+ENV SCCACHE_CACHE_SIZE="1G"
+ENV SCCACHE_DIR="/cache/sccache"
+ENV RUSTC_WRAPPER="sccache"
+
 WORKDIR /build
-COPY . .
-COPY --from=cacher /build/target target
-COPY --from=cacher $CARGO_HOME $CARGO_HOME
-RUN cargo build --release --bin main-app
+COPY . /build/
+RUN --mount=type=cache,target=/cache/sccache cargo build --release && sccache --show-stats
 
 FROM gcr.io/distroless/cc AS runtime
 EXPOSE 80
