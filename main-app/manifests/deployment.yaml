@@ -14,4 +14,10 @@ spec:
     spec:
       containers:
         - name: main-app
-          image: eu.gcr.io/strax-dwk/main-app@sha256:747090156528d3d43bb24bd7fd17ca9faba31a4facf6977ce0ce62aab714b68c
+          image: eu.gcr.io/strax-dwk/main-app@sha256:406b6acfc772c7d2a955ce23080e44ea7b6f6b66e782277f8f61a4f6c3af8343
+          env:
+            - name: MESSAGE
+              valueFrom:
+                configMapKeyRef:
+                  key: message
+                  name: main-app

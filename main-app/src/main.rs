@@ -5,7 +5,6 @@ use tokio::sync::oneshot;
 use tracing::{info, Level};
 use tracing_subscriber::{EnvFilter};
 use warp::Filter;
-use tokio::sync::Mutex;
 use std::sync::Arc;
 
 use std::str::FromStr;
@@ -41,7 +40,9 @@ pub async fn main() {
     tokio::task::spawn(signal_handler(tx));
 
     let pingpong_client = pingpong::Client::connect("http://pingpong-svc:50051").await.unwrap();
-    let routes = app::routes::status(Arc::new(Mutex::new(pingpong_client))).with(warp::trace::request());
+    let message = env::var("MESSAGE").expect("the MESSAGE environment variable is not present");
+    let ctx = Arc::new(app::Ctx::new(pingpong_client, message));
+    let routes = app::routes::status(ctx.clone()).with(warp::trace::request());
     let (addr, server) = warp::serve(routes)
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async {
             rx.await.ok();
