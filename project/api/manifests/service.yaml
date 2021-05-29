@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   namespace: dwk-project
-  name: api-service
+  name: api
 spec:
   type: ClusterIP
   selector:
