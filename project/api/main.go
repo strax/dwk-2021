@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bufio"
 	"context"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -13,18 +12,26 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	_ "github.com/jackc/pgx/v4/stdlib"
+	"github.com/jmoiron/sqlx"
+
+	"github.com/golang-migrate/migrate/v4"
+	"github.com/golang-migrate/migrate/v4/database/postgres"
+	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-
-func image(w http.ResponseWriter, r *http.Request) {
-	f, err := os.Open("/mnt/volume1/picsum-400-400.webp")
+func runMigrations(db *sqlx.DB) {
+	log.Info().Msg("Running migrations")
+	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		panic(err)
 	}
-	rdr := bufio.NewReader(f)
-	w.Header().Set("Content-Type", "image/webp")
-	_, err = rdr.WriteTo(w)
+	m, err := migrate.NewWithDatabaseInstance("file:///migrations", "postgres", driver)
 	if err != nil {
+		panic(err)
+	}
+	if err := m.Up(); err != migrate.ErrNoChange {
 		panic(err)
 	}
 }
@@ -33,6 +40,11 @@ func main() {
 	var srv http.Server
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+
+	dbconfig := DBConfigFromEnv()
+	db := sqlx.MustConnect("pgx", dbconfig.ToPostgresConnectionString())
+
+	runMigrations(db)
 
 	exit := make(chan struct{})
 	go func() {
@@ -66,8 +78,14 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/health"))
 	r.Use(hlog.RequestIDHandler("request_id", "Request-Id"))
+	r.Use(func (next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := context.WithValue(r.Context(), "db", db)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
+	})
 
-	r.Get("/image", image)
+	r.Get("/image", GetImage)
 	r.Post("/todos", CreateTodo)
 	r.Get("/todos", ListTodos)
 

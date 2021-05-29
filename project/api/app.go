@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 	"net/http"
+	"os"
 	"time"
 )
 
@@ -11,13 +14,13 @@ var db = make(map[uuid.UUID]Todo)
 
 // Fields of a Todo which are not generated.
 type NewTodo struct {
-	Text string 	`json:"text"`
+	Text string 	`json:"text" db:"text"`
 }
 
 type Todo struct {
-	Id uuid.UUID 		`json:"id"`
-	Text string			`json:"text"`
-	CreatedAt time.Time `json:"createdAt"`
+	Id uuid.UUID 		`json:"id" db:"id"`
+	Text string			`json:"text" db:"text"`
+	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
 func respondJSON(w http.ResponseWriter, v interface{}, statusCode int) {
@@ -29,10 +32,26 @@ func respondJSON(w http.ResponseWriter, v interface{}, statusCode int) {
 	}
 }
 
+
+func GetImage(w http.ResponseWriter, r *http.Request) {
+	f, err := os.Open("/mnt/volume1/picsum-400-400.webp")
+	if err != nil {
+		panic(err)
+	}
+	rdr := bufio.NewReader(f)
+	w.Header().Set("Content-Type", "image/webp")
+	_, err = rdr.WriteTo(w)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func ListTodos(w http.ResponseWriter, r *http.Request) {
 	todos := make([]Todo, 0)
-	for k := range db {
-		todos = append(todos, db[k])
+	db := r.Context().Value("db").(*sqlx.DB)
+	err := db.Select(&todos, "SELECT * FROM todo")
+	if err != nil {
+		panic(err)
 	}
 	respondJSON(w, todos, http.StatusOK)
 }
@@ -58,6 +77,10 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		Text: data.Text,
 		CreatedAt: time.Now(),
 	}
-	db[id] = todo
+	db := r.Context().Value("db").(*sqlx.DB)
+	_, err = db.NamedExec("INSERT INTO todo (id, text, created_at) VALUES (:id, :text, :created_at)", todo)
+	if err != nil {
+		panic(err)
+	}
 	respondJSON(w, todo, http.StatusCreated)
 }

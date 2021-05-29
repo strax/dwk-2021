@@ -8,4 +8,5 @@ RUN go build -o /build/dwk-api
 
 FROM gcr.io/distroless/base
 COPY --from=build /build/dwk-api /dwk-api
+COPY ./migrations /migrations
 CMD ["/dwk-api"]

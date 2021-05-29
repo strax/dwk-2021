@@ -1,0 +1,83 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: postgres-secret
+  namespace: dwk-project
+spec:
+  encryptedData:
+    root.password: AgA/0uiFhOknW6FZvtAwp+nrNNI0yJnreN5JviFy9y5DaTFeGlmCkXdNo+fd6DadgoMFk8AQ7llodOnV5Iw/TpKzETd8kLoHEpFeY9aH1ZPSTe95gNDJ/mffuy7oye27xvNEX/oF8Z/xJw2yPNuVUGIAonrRNz70v8NtmsEmVMf2i5u88JcK6pGOtpzox1GasdgzEl1HixVFUyXjB5X4NTbTfy4Rtr4Aden5hs4lgJotttPj//CjRlTj0W8ccp5BQntJqqV0ecUPg829fU5VU7sSiYyoMumneorH6MBXplKJgixry8sxAxi6vSm/bi3tgf+B26BJG5NkYQIzPFkkRmgPGn5NB0rUeHf64tzpmnaTwliAHYgxsdJoGaMGzPGAOZaJXoiIH0j9NCLDDIx8Nr+QqSBCsZcgbUEFsJ1f/xVw7/HozzbyIiKpTT+D+9AGfd2E6g5o+9AzSo641Eie76Wt9OItgg6uFh190V//nedVZuoajT3HgQbBt2aIhkBl7QWgeAPrtnbM8lJ1/VPlvz8m5fV7QDkf07GXp/oWqJJwLb8ck/XqUf3e0UBGDo32tyJI566hkr85eUY2sg1nZHdqwHm3BS17edHX0Vb9/tlImcRiQ7skG3xjJ0rPM9zKFSR+wbRvnK3sxxXHPPLxOjXLoEUXOaQmnqsQOCNLxAGCEZFYya4twTgtAv7QxvdElp1nCCsj4pMIxg==
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: postgres-secret
+      namespace: dwk-project
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  namespace: dwk-project
+  name: postgres
+spec:
+  selector:
+    matchLabels:
+      app: postgres
+  serviceName: postgres
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      volumes:
+        - name: postgres-secret
+          secret:
+            secretName: postgres-secret
+      containers:
+      - name: postgres
+        image: postgres:13.0
+        ports:
+        - containerPort: 5432
+          name: postgres
+        env:
+          - name: LC_ALL
+            value: en_US.UTF-8
+          - name: PGDATA
+            value: /mnt/pgdata
+          - name: POSTGRES_USER
+            value: root
+          - name: POSTGRES_PASSWORD_FILE
+            value: /etc/secret/postgres/root.password
+          - name: POSTGRES_HOST_AUTH_METHOD
+            value: scram-sha-256
+          - name: POSTGRES_INITDB_ARGS
+            value: "--auth-host=scram-sha-256 --data-checksums"
+        volumeMounts:
+          - mountPath: /mnt/pgdata
+            name: pgdata
+          - mountPath: /etc/secret/postgres
+            name: postgres-secret
+            readOnly: true
+  volumeClaimTemplates:
+    - metadata:
+        name: pgdata
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: local-path
+        resources:
+          requests:
+            storage: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: dwk-project
+  name: postgres
+spec:
+  selector:
+    app: postgres
+  clusterIP: None
+  ports:
+  - port: 5432
+    targetPort: postgres

@@ -28,14 +28,14 @@ spec:
     - match: PathPrefix(`/api`)
       kind: Rule
       services:
-        - name: project-api-service
+        - name: api-service
           port: 80
       middlewares:
         - name: api-stripprefix
     - match: PathPrefix(`/`)
       kind: Rule
       services:
-        - name: project-frontend-svc
+        - name: frontend-svc
           port: 80
       middlewares:
         - name: frontend-compress

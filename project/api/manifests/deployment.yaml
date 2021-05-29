@@ -18,8 +18,13 @@ spec:
             claimName: project-pvc
             readOnly: true
       containers:
-      - name: api
-        image: eu.gcr.io/strax-dwk/project-api@sha256:ec3dbfe8b188f0eb820e941ce390839f77d71d8f9ba8605acf25c65faee71040
-        volumeMounts:
-          - mountPath: /mnt/volume1
-            name: volume1
+        - name: api
+          image: eu.gcr.io/strax-dwk/project-api@sha256:702b7883d98ae53cff31bc8e8172c66b56a0aab40a9d0ed8d104661e0b01ebe0
+          volumeMounts:
+            - mountPath: /mnt/volume1
+              name: volume1
+          envFrom:
+            - configMapRef:
+                name: api-config
+            - secretRef:
+                name: api-secret
