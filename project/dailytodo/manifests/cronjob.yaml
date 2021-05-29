@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  namespace: dwk-project
+  name: dailytodo-cronjob
+spec:
+  schedule: "@daily"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: dailytodo
+              image: eu.gcr.io/strax-dwk/dailytodo@sha256:3c05c23dd2347491607d788a50fff3fe98f6aa156056b9596eb9600d3f51156f
+              imagePullPolicy: IfNotPresent
+          restartPolicy: OnFailure
