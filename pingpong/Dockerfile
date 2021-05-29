@@ -13,7 +13,8 @@ ENV RUSTC_WRAPPER="sccache"
 
 WORKDIR /build
 COPY . /build/
-RUN --mount=type=cache,target=/cache/sccache cargo build --release && sccache --show-stats
+RUN cargo fetch
+RUN --mount=type=cache,target=/cache/sccache cargo build --frozen --release && sccache --show-stats
 
 FROM gcr.io/distroless/cc AS runtime
 EXPOSE 80

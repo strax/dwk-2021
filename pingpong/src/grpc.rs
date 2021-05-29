@@ -1,6 +1,6 @@
-use tonic::{transport::Server, Request, Response, Status};
-use std::sync::{Arc, atomic::Ordering};
-use crate::app::State;
+use tonic::{Request, Response, Status};
+use std::sync::{Arc};
+use crate::app::App;
 
 use proto::pingpong_service_server as server;
 
@@ -12,11 +12,11 @@ mod proto {
 }
 
 pub struct Endpoint {
-    state: Arc<State>
+    state: Arc<App>
 }
 
 impl Endpoint {
-    pub fn new(state: Arc<State>) -> Self {
+    pub fn new(state: Arc<App>) -> Self {
         Endpoint { state }
     }
 }
@@ -24,6 +24,7 @@ impl Endpoint {
 #[tonic::async_trait]
 impl PingpongService for Endpoint {
     async fn get_stats(&self, _: Request<()>) -> Result<Response<Stats>, Status> {
-        Ok(Response::new(Stats { pings: self.state.counter.load(Ordering::SeqCst) }))
+        let pings = self.state.count_pings().await.unwrap() as u64;
+        Ok(Response::new(Stats { pings }))
     }
 }

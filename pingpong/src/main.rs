@@ -1,21 +1,24 @@
+mod app;
+mod grpc;
+mod config;
+
+use std::str::FromStr;
+use std::net::{SocketAddr, IpAddr};
+use std::sync::{Arc};
+
 use futures::future::select;
 use tokio::pin;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::watch;
-use tracing::{info, Level};
+use tracing::{info, debug, Level};
+use tracing::instrument::Instrument;
 use tracing_subscriber::{EnvFilter};
 use warp::Filter;
 use tonic::transport::Server as GrpcServer;
+use sqlx::postgres::{PgPoolOptions};
 
-use std::str::FromStr;
-use std::net::{SocketAddr, IpAddr};
-use std::env;
-use std::sync::{Arc};
-
-mod app;
-mod grpc;
-
-const DEFAULT_PORT: u16 = 80;
+use config::Config;
+use sqlx::migrate::Migrator;
 
 async fn signal_handler(notification: watch::Sender<()>) {
     let mut sigint = signal(SignalKind::interrupt()).unwrap();
@@ -28,20 +31,29 @@ async fn signal_handler(notification: watch::Sender<()>) {
     notification.send(()).unwrap();
 }
 
+static MIGRATOR: Migrator = sqlx::migrate!();
+
 #[tokio::main]
 pub async fn main() {
     tracing_subscriber::fmt()
         .with_env_filter(EnvFilter::from_env("LOG_LEVEL").add_directive(Level::INFO.into()))
         .without_time()
         .init();
-    let port = match env::var("PORT") {
-        Ok(port) => u16::from_str_radix(&port, 10).unwrap(),
-        Err(_) => DEFAULT_PORT
-    };
+
     let (tx, mut rx) = watch::channel(());
     tokio::task::spawn(signal_handler(tx));
 
-    let state = Arc::new(app::State::default());
+    let config = Config::from_env().unwrap();
+    let db = PgPoolOptions::new().max_connections(5).connect_with(config.database).await.unwrap();
+
+    async {
+        debug!("start");
+        MIGRATOR.run(&db).await.expect("failed to run migrations");
+        debug!("done");
+    }.instrument(tracing::info_span!("migrations")).await;
+
+
+    let state = Arc::new(app::App::new(db));
 
     let routes = app::routes::ping(state.clone())
         .or(app::routes::stats(state.clone()))
@@ -49,7 +61,7 @@ pub async fn main() {
 
     let mut rx2 = rx.clone();
     let (http_addr, server) = warp::serve(routes)
-        .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async move {
+        .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), config.port), async move {
             rx2.changed().await.ok();
         });
     let http = tokio::task::spawn(server);
@@ -60,6 +72,6 @@ pub async fn main() {
             rx.changed().await.ok();
         });
     info!("grpc.up");
-    futures::future::join(http, grpc).await;
+    let _ = futures::future::join(http, grpc).await;
     info!("shutdown");
 }
