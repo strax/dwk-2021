@@ -14,4 +14,4 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: eu.gcr.io/strax-dwk/project-frontend@sha256:839b5da3befac45c133686d67be9d61efc02904dbc9410e72db30cfaf818460c
+          image: eu.gcr.io/strax-dwk/project-frontend@sha256:648fdf3c17f02fe032c38b4b95d723892a5d2750d5fb916b78ff53701ab5107b

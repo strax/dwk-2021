@@ -34,6 +34,7 @@ export function NewTodoFormlet(props: NewTodoFormletProps) {
         placeholder="Type and press Enter"
         onChange={(evt: React.ChangeEvent<HTMLInputElement>) => setDraftText(evt.target.value)}
         value={draftText}
+        maxLength={140}
       />
       <button className={styles.submitButton} type="submit" disabled={disabled}>
         Create
