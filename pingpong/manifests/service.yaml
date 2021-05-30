@@ -4,7 +4,7 @@ metadata:
   namespace: dwk-exercises
   name: pingpong-svc
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: pingpong
   ports:

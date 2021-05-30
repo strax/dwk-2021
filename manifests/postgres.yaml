@@ -1,16 +1,3 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  name: postgres-secret
-  namespace: dwk-exercises
-spec:
-  encryptedData:
-    password: AgBBKdA9UMFyZXZMj9Cf+D5+EnwmXLN4RSRaC/oFrQ3BnkftJop/Kl7WsMVjuychmrychwP3G1ma1rlVjVbnWrqIoSRQsFGXjRTH95hbsw7DqKiSo9aFdPE1iEBkPO7TiPMbfab80dpX7s3qx8KCQ22hpGY4EtJ3qxR0HEzIp3X2lDkqdZeRdscXtPZ6o+SF70MX4Ir/ct2d1E4pMWJ8o5qlXF8ok6m7mk2xtwk7MjNcB9fajUy7S8j/r0CAA1/PSNMkORuez4eftOpgFt67OlB51pGubB2eIUtZODYw5TW5P2gzOyfhPv6jFasgP7AP1jGBBCTdHVxDyCndWWE50oj1IipnRcSy2N7LqUbOyeX3rMZkv9VrBnYoYkTg5q/gKdBF85qZIuQEnAo/fEdjxReGJ+eiYWLoQwuttmF2yqM8WyZGSkVNBZ08IvCgcefu7lZ0fTBuEKTOwGL9doW39VXRhgcTJT5oSjLy3s5mb9Gvh2/9D5+uHKAq4bN817RX9mxiNV6p1oAtgBMmFazJV1hkKFTnP/kCEaCLFr883IOxa0Uj4p8KX4PW504L52Qqk2IwhN1tryoQxVCSQvr+8nWxMHMCO4TVt2j1amwnXCP4+fG06ykuPV2J5kKeUp3QK5nTjTPgu0aWEWbU8EFj5mZ0a+PoheAzu1RHYBVOdsvMCsYqvfTeOdsj8hokX3LLDPL7fpo3shESw7GaKzzlLmISGg55bvKEVdrHXZ7lYVVHao9GOYio8JFDRg/WFqc=
-  template:
-    data: null
-    metadata:
-      name: postgres-secret
-      namespace: dwk-exercises
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -41,8 +28,6 @@ spec:
         env:
           - name: LC_ALL
             value: en_US.UTF-8
-          - name: PGDATA
-            value: /mnt/pgdata
           - name: POSTGRES_USER
             value: root
           - name: POSTGRES_PASSWORD_FILE
@@ -52,8 +37,9 @@ spec:
           - name: POSTGRES_INITDB_ARGS
             value: "--auth-host=scram-sha-256 --data-checksums"
         volumeMounts:
-          - mountPath: /mnt/pgdata
+          - mountPath: /var/lib/postgresql/data
             name: pgdata
+            subPath: pgdata
           - mountPath: /etc/secret/postgres
             name: postgres-secret
             readOnly: true
@@ -62,7 +48,6 @@ spec:
         name: pgdata
       spec:
         accessModes: ["ReadWriteOnce"]
-        storageClassName: local-path
         resources:
           requests:
             storage: 100Mi
