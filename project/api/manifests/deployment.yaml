@@ -19,7 +19,7 @@ spec:
             readOnly: true
       containers:
         - name: api
-          image: eu.gcr.io/strax-dwk/project-api@sha256:702b7883d98ae53cff31bc8e8172c66b56a0aab40a9d0ed8d104661e0b01ebe0
+          image: eu.gcr.io/strax-dwk/project-api@sha256:be04b0bb1e89480123390bf8e079842dd3a4bc49899cf01dd4b394cb1531e594
           volumeMounts:
             - mountPath: /mnt/volume1
               name: volume1

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"github.com/google/uuid"
 	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"time"
@@ -63,7 +64,8 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
-	if data.Text == "" {
+	if data.Text == "" || len(data.Text) > 140 {
+		log.Warn().Str("text", data.Text).Msg("Rejecting due to invalid input")
 		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
 		return
 	}
@@ -82,5 +84,6 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	log.Info().Stringer("id", todo.Id).Str("text", todo.Text).Msg("Created new todo")
 	respondJSON(w, todo, http.StatusCreated)
 }
