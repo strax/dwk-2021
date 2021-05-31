@@ -9,3 +9,4 @@ data:
   PGUSER: "pingpong"
   PGDATABASE: "pingpong"
   PORT: "80"
+  BASE_PATH: "pingpong"

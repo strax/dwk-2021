@@ -31,27 +31,29 @@ struct StatsResponse {
     pings: i64
 }
 
-pub fn with_state(state: Arc<App>) -> impl Filter<Extract = (Arc<App>,), Error = std::convert::Infallible> + Clone {
-    warp::any().map(move || state.clone())
+pub fn with_state(state: Arc<App>) -> warp::filters::BoxedFilter<(Arc<App>, )> {
+    warp::any().map(move || state.clone()).boxed()
 }
 
 pub mod routes {
     use super::*;
 
     #[inline]
-    pub fn ping(state: Arc<App>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    pub fn ping(state: Arc<App>) -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
         warp::path::end()
             .and(with_state(state))
             .and(warp::get())
             .and_then(handlers::ping)
+            .boxed()
     }
 
     #[inline]
-    pub fn stats(state: Arc<App>) -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Clone {
+    pub fn stats(state: Arc<App>) -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
         warp::path("stats")
             .and(with_state(state))
             .and(warp::get())
             .and_then(handlers::stats)
+            .boxed()
     }
 }
 

@@ -5,6 +5,7 @@ use sqlx::postgres::PgConnectOptions;
 #[derive(Debug)]
 pub struct Config {
     pub port: u16,
+    pub base_path: Option<String>,
     pub database: PgConnectOptions
 }
 
@@ -15,6 +16,7 @@ fn env_var(key: &str) -> Result<String> {
 impl Config {
     pub fn from_env() -> Result<Config> {
         let port = u16::from_str_radix(&env_var("PORT")?, 10)?;
+        let base_path = env_var("BASE_PATH").ok();
         let database = PgConnectOptions::new()
             .host(&env_var("PGHOST")?)
             .port(u16::from_str_radix(&env_var("PGPORT")?, 10)?)
@@ -22,6 +24,6 @@ impl Config {
             .password(&env_var("PGPASS")?)
             .database(&env_var("PGDATABASE")?)
             .application_name("pingpong");
-        Ok(Config { port, database })
+        Ok(Config { port, base_path, database })
     }
 }

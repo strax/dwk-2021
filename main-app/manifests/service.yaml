@@ -3,8 +3,11 @@ kind: Service
 metadata:
   namespace: dwk-exercises
   name: main-app-svc
+  annotations:
+    cloud.google.com/backend-config: |
+      {"ports": {"80": "http-backendconfig"}}
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: main-app
   ports:

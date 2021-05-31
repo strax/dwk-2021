@@ -14,9 +14,14 @@ spec:
     spec:
       containers:
         - name: pingpong
-          image: eu.gcr.io/strax-dwk/pingpong@sha256:150a8e6a1a7eb4dfb99e45a8470a4401f1d76629aa3ffe1bf533a80771f1fec4
+          image: eu.gcr.io/strax-dwk/pingpong@sha256:38299538376d08238f99c18a2ba69a5829fca0431269de0d1970ff46fbd6f14f
           envFrom:
             - configMapRef:
                 name: pingpong-config
             - secretRef:
                 name: pingpong-secret
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /health
+            initialDelaySeconds: 30

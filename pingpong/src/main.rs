@@ -33,6 +33,10 @@ async fn signal_handler(notification: watch::Sender<()>) {
 
 static MIGRATOR: Migrator = sqlx::migrate!();
 
+pub fn health_check() -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
+    warp::path("health").map(|| ".").boxed()
+}
+
 #[tokio::main]
 pub async fn main() {
     tracing_subscriber::fmt()
@@ -58,9 +62,19 @@ pub async fn main() {
     let routes = app::routes::ping(state.clone())
         .or(app::routes::stats(state.clone()))
         .with(warp::trace::request());
+    let routes = match config.base_path {
+        None => {
+            info!("Base path = /");
+            routes.boxed()
+        },
+        Some(base_path) => {
+            info!("Base path = /{}", &base_path);
+            warp::path(base_path).and(routes).boxed()
+        }
+    };
 
     let mut rx2 = rx.clone();
-    let (http_addr, server) = warp::serve(routes)
+    let (http_addr, server) = warp::serve(routes.or(health_check()))
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), config.port), async move {
             rx2.changed().await.ok();
         });

@@ -26,6 +26,10 @@ async fn signal_handler(notification: oneshot::Sender<()>) {
     notification.send(()).unwrap();
 }
 
+fn health_check() -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
+    warp::path("health").map(|| ".").boxed()
+}
+
 #[tokio::main]
 pub async fn main() {
     tracing_subscriber::fmt()
@@ -43,7 +47,7 @@ pub async fn main() {
     let message = env::var("MESSAGE").expect("the MESSAGE environment variable is not present");
     let ctx = Arc::new(app::Ctx::new(pingpong_client, message));
     let routes = app::routes::status(ctx.clone()).with(warp::trace::request());
-    let (addr, server) = warp::serve(routes)
+    let (addr, server) = warp::serve(health_check().or(routes))
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), port), async {
             rx.await.ok();
         });

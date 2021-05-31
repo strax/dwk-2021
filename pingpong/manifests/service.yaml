@@ -3,8 +3,11 @@ kind: Service
 metadata:
   namespace: dwk-exercises
   name: pingpong-svc
+  annotations:
+    cloud.google.com/backend-config: |
+      {"ports": {"80": "http-backendconfig"}}
 spec:
-  type: LoadBalancer
+  type: NodePort
   selector:
     app: pingpong
   ports:
