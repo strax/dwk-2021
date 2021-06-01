@@ -15,12 +15,12 @@ var db = make(map[uuid.UUID]Todo)
 
 // Fields of a Todo which are not generated.
 type NewTodo struct {
-	Text string 	`json:"text" db:"text"`
+	Text string `json:"text" db:"text"`
 }
 
 type Todo struct {
-	Id uuid.UUID 		`json:"id" db:"id"`
-	Text string			`json:"text" db:"text"`
+	Id        uuid.UUID `json:"id" db:"id"`
+	Text      string    `json:"text" db:"text"`
 	CreatedAt time.Time `json:"createdAt" db:"created_at"`
 }
 
@@ -32,7 +32,6 @@ func respondJSON(w http.ResponseWriter, v interface{}, statusCode int) {
 		panic(err)
 	}
 }
-
 
 func GetImage(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("/mnt/volume1/picsum-400-400.webp")
@@ -74,9 +73,9 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
-	todo := Todo {
-		Id: id,
-		Text: data.Text,
+	todo := Todo{
+		Id:        id,
+		Text:      data.Text,
 		CreatedAt: time.Now(),
 	}
 	db := r.Context().Value("db").(*sqlx.DB)

@@ -15,9 +15,9 @@ func MustLookupEnv(key string) string {
 }
 
 type DBConfig struct {
-	Host string
-	Port uint16
-	User string
+	Host     string
+	Port     uint16
+	User     string
 	Password string
 	Database string
 }
@@ -31,11 +31,11 @@ func DBConfigFromEnv() DBConfig {
 	}
 	user := MustLookupEnv("PGUSER")
 	database := MustLookupEnv("PGDATABASE")
-	return DBConfig {
-		Host: host,
+	return DBConfig{
+		Host:     host,
 		Password: password,
-		Port: uint16(port),
-		User: user,
+		Port:     uint16(port),
+		User:     user,
 		Database: database,
 	}
 }

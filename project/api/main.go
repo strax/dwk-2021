@@ -52,7 +52,7 @@ func main() {
 		signal.Notify(term, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 		// Wait for termination signal
-		<- term
+		<-term
 		log.Warn().Msg("shutting down")
 		// Shut down the server
 		if err := srv.Shutdown(context.Background()); err != nil {
@@ -60,10 +60,10 @@ func main() {
 		}
 		close(exit)
 	}()
-	
+
 	r := chi.NewRouter()
 	r.Use(hlog.NewHandler(log.Logger))
-	r.Use(hlog.AccessHandler(func (r *http.Request, status, size int, duration time.Duration) {
+	r.Use(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
 		log.Ctx(r.Context()).Info().
 			Str("method", r.Method).
 			Stringer("url", r.URL).
@@ -78,7 +78,7 @@ func main() {
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Heartbeat("/health"))
 	r.Use(hlog.RequestIDHandler("request_id", "Request-Id"))
-	r.Use(func (next http.Handler) http.Handler {
+	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "db", db)
 			next.ServeHTTP(w, r.WithContext(ctx))
@@ -98,5 +98,5 @@ func main() {
 		log.Fatal().Err(err)
 	}
 
-	<- exit
+	<-exit
 }
