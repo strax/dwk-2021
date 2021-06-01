@@ -14,12 +14,23 @@ func MustLookupEnv(key string) string {
 	return value
 }
 
+type AppConfig struct {
+	PathPrefix string
+	DBConfig
+}
+
 type DBConfig struct {
 	Host     string
 	Port     uint16
 	User     string
 	Password string
 	Database string
+}
+
+func AppConfigFromEnv() AppConfig {
+	dbConfig := DBConfigFromEnv()
+	pathPrefix, _ := os.LookupEnv("PATH_PREFIX")
+	return AppConfig{pathPrefix, dbConfig}
 }
 
 func DBConfigFromEnv() DBConfig {

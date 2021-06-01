@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: dwk-project
-  name: api-dep
+  name: api
 spec:
   selector:
     matchLabels:
@@ -19,7 +19,7 @@ spec:
             readOnly: true
       containers:
         - name: api
-          image: eu.gcr.io/strax-dwk/project-api@sha256:be04b0bb1e89480123390bf8e079842dd3a4bc49899cf01dd4b394cb1531e594
+          image: eu.gcr.io/strax-dwk/project-api@sha256:b186757956eb2c702eb8677ccc8bbf914673a953b4c72e1c1daa1e80686e66a3
           volumeMounts:
             - mountPath: /mnt/volume1
               name: volume1
@@ -28,3 +28,7 @@ spec:
                 name: api-config
             - secretRef:
                 name: api-secret
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /healthz

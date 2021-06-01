@@ -1,0 +1,16 @@
+apiVersion: skaffold/v2beta16
+kind: Config
+metadata:
+  name: todos-api
+build:
+  artifacts:
+  - image: eu.gcr.io/strax-dwk/project-api
+    docker:
+      dockerfile: Dockerfile
+deploy:
+  kubectl:
+    manifests:
+    - manifests/config.yaml
+    - manifests/deployment.yaml
+    - manifests/persistentvolumeclaim.yaml
+    - manifests/service.yaml

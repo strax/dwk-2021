@@ -22,7 +22,7 @@ import (
 )
 
 func runMigrations(db *sqlx.DB) {
-	log.Info().Msg("Running migrations")
+	start := time.Now()
 	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
 	if err != nil {
 		panic(err)
@@ -34,6 +34,7 @@ func runMigrations(db *sqlx.DB) {
 	if err := m.Up(); err != migrate.ErrNoChange {
 		panic(err)
 	}
+	log.Info().Msgf("Ran migrations in %v ms", time.Since(start).Milliseconds())
 }
 
 func main() {
@@ -41,8 +42,10 @@ func main() {
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
-	dbconfig := DBConfigFromEnv()
-	db := sqlx.MustConnect("pgx", dbconfig.ToPostgresConnectionString())
+	config := AppConfigFromEnv()
+	db := sqlx.MustConnect("pgx", config.DBConfig.ToPostgresConnectionString())
+
+	log.Info().Msgf("Service path prefix: %v", config.PathPrefix)
 
 	runMigrations(db)
 
@@ -53,7 +56,7 @@ func main() {
 
 		// Wait for termination signal
 		<-term
-		log.Warn().Msg("shutting down")
+		log.Warn().Msg("Shutting down")
 		// Shut down the server
 		if err := srv.Shutdown(context.Background()); err != nil {
 			log.Err(err)
@@ -62,9 +65,36 @@ func main() {
 	}()
 
 	r := chi.NewRouter()
+
+	r.Use(middleware.RequestID)
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("X-Request-Id", middleware.GetReqID(r.Context()))
+			next.ServeHTTP(w, r)
+		})
+	})
+	r.Use(middleware.RealIP)
+	r.Use(middleware.NoCache)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Heartbeat("/healthz"))
+
+	// The rest of the middlewares and routes have the prefix stripped out of the URL path
+	r.Use(func(next http.Handler) http.Handler {
+		return http.StripPrefix(config.PathPrefix, next)
+	})
+
 	r.Use(hlog.NewHandler(log.Logger))
+	r.Use(func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			requestId := middleware.GetReqID(r.Context())
+			newLog := hlog.FromRequest(r).With().Str("requestId", requestId).Logger()
+			wrap := hlog.NewHandler(newLog)
+			wrap(next).ServeHTTP(w, r)
+		})
+	})
 	r.Use(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
-		log.Ctx(r.Context()).Info().
+		log.Ctx(r.Context()).Trace().
 			Str("method", r.Method).
 			Stringer("url", r.URL).
 			Int("status", status).
@@ -72,12 +102,6 @@ func main() {
 			Dur("duration", duration).
 			Msg("request")
 	}))
-	r.Use(middleware.RequestID)
-	r.Use(middleware.RealIP)
-	r.Use(middleware.NoCache)
-	r.Use(middleware.Recoverer)
-	r.Use(middleware.Heartbeat("/health"))
-	r.Use(hlog.RequestIDHandler("request_id", "Request-Id"))
 	r.Use(func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := context.WithValue(r.Context(), "db", db)

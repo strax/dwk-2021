@@ -1,18 +1,3 @@
-apiVersion: bitnami.com/v1alpha1
-kind: SealedSecret
-metadata:
-  creationTimestamp: null
-  name: api-secret
-  namespace: dwk-project
-spec:
-  encryptedData:
-    PGPASS: AgBOnTZ/dI+yBH6eg6eax9JXL8rIjtZDvolzsWXtqCpzmtkYtWUKKCLdLnmXJJLBMuMfhvTktstRYzFz6GbchCjc+NfRkIDcLFcv8jNcqCiJ5mH+JGGui8ZHGveJ1R+1Gp/e4LZvbuYEm2GMUxQ5IfOVyqR6KnyZC9ef0N4GH+/XewLuJ8coW+glpH0KfSmhbAwg0udODExZJ2qg1j6XRxSUm+jIXRnCdthyn/XozTGO9Mh5ii1+8ICkuZBQpH6aURKpB0yMpeiGASs3TGJtWMr0S4x549HM3XtCp6ooYGGTs260Ynzvh2uQg+plLkjcc7YgeKZR270UTRzD7b0APOP6vNfnWyXEu2uMQbisLspbEbHPqxBn69fohDRZd0Mw5ZrGSyu9Cslr4Fz6UevqzpPmQboR6mFl2dKRj9jLD0KhvTCsq8Eowq/ZhiNe9faYNJOYiI+B2vQJOX36TluTg6cUtyDWqttcdPDXYWgJ0x3hxc5u6ZCJkZiQ7/97BuRquMXqvqQyIyH7ALUr7dbS3z9GfbFMvxRSOrmqbqqY6Owga7LbHqmfdqk2So7qSpCe4tJXF/4mk6TDoMo/rUedTWGME32AS98+jAlZjUlkrVNhjx7JrVm+reIAynrcFK9FN9nuQh3kGEifsAHgBJapR39p5t5i1AravOLTYcw//Y6XJi5/5AnsM3MZJnRYvU2lzQgQsnuF3w==
-  template:
-    data: null
-    metadata:
-      creationTimestamp: null
-      name: api-secret
-      namespace: dwk-project
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -24,3 +9,4 @@ data:
   PGPORT: "5432"
   PGUSER: todos
   PGDATABASE: todos
+  PATH_PREFIX: /api
