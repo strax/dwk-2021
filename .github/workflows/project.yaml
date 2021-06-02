@@ -69,8 +69,17 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.GKE_SA_KEY }}
+          project_id: ${{ secrets.GKE_PROJECT }}
+      - run: gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
       - name: Setup Kustomize
         run: |
           curl -sfLo- https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.1.3/kustomize_v4.1.3_linux_amd64.tar.gz | tar -xz
           ./kustomize version
-      - run: echo "${{ needs.build-frontend-image.outputs.image }} ${{ needs.build-api-image.outputs.image }}"
+      - name: Deploy
+        run: |
+          ./kustomize edit set image frontend/image=${{ needs.build-frontend-image.outputs.image }}
+          ./kustomize edit set image frontend/image=${{ needs.build-api-image.outputs.image }}
+          kubectl apply -k .
