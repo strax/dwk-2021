@@ -1,9 +1,9 @@
 name: Release project
 on:
-  push:
-    branches:
-      - main
-      - actions
+  [push]
+concurrency:
+  group: ${{ github.ref }}
+  cancel-in-progress: true
 env:
   GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
