@@ -82,5 +82,5 @@ jobs:
       - name: Deploy
         run: |
           ./kustomize edit set image frontend/image=${{ needs.build-frontend-image.outputs.image }}
-          ./kustomize edit set image frontend/image=${{ needs.build-api-image.outputs.image }}
+          ./kustomize edit set image api/image=${{ needs.build-api-image.outputs.image }}
           kubectl apply -k .
