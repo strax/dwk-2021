@@ -14,6 +14,7 @@ jobs:
     name: "frontend: build and push"
     outputs:
       image: ${{ steps.build-push.outputs.image }}
+      digest: ${{ steps.build-push.outputs.digest }}
     permissions:
       packages: write
       contents: read
@@ -31,24 +32,27 @@ jobs:
       - id: build-push
         name: Build image and push to registry
         run: |
-          REVISION="${GITHUB_REF#refs/heads/}-$(git rev-parse --short $GITHUB_SHA)"
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            IMAGE_TAG="latest"
+          else
+            IMAGE_TAG="${GITHUB_REF#refs/heads/}"
+          fi
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           docker build \
-            --tag "$IMAGE_ID:$REVISION" \
+            --tag "$IMAGE_ID:$IMAGE_TAG" \
             --cache-from "$IMAGE_ID" \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --label org.opencontainers.image.revision="$GITHUB_SHA" \
             .
-          docker push "$IMAGE_ID:$REVISION"
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            docker tag "$IMAGE_ID:$REVISION" "$IMAGE_ID:latest"
-            docker push "$IMAGE_ID:latest"
-          fi
-          echo "::set-output name=image::$IMAGE_ID:$REVISION"
+          docker push "$IMAGE_ID:$IMAGE_TAG"
+          DIGEST=$(docker images --no-trunc --quiet "$IMAGE_ID:$IMAGE_TAG")
+          echo "::set-output name=image::$IMAGE_ID"
+          echo "::set-output name=digest::$DIGEST"
   build-api-image:
     name: "api: build and push"
     outputs:
       image: ${{ steps.build-push.outputs.image }}
+      digest: ${{ steps.build-push.outputs.digest }}
     permissions:
       packages: write
       contents: read
@@ -66,20 +70,22 @@ jobs:
       - id: build-push
         name: Build image and push to registry
         run: |
-          REVISION="${GITHUB_REF#refs/heads/}-$(git rev-parse --short $GITHUB_SHA)"
+          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
+            IMAGE_TAG="latest"
+          else
+            IMAGE_TAG="${GITHUB_REF#refs/heads/}"
+          fi
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           docker build \
-            --tag "$IMAGE_ID:$REVISION" \
+            --tag "$IMAGE_ID:$IMAGE_TAG" \
             --cache-from "$IMAGE_ID" \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --label org.opencontainers.image.revision="$GITHUB_SHA" \
             .
-          docker push "$IMAGE_ID:$REVISION"
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            docker tag "$IMAGE_ID:$REVISION" "$IMAGE_ID:latest"
-            docker push "$IMAGE_ID:latest"
-          fi
-          echo "::set-output name=image::$IMAGE_ID:$REVISION"
+          docker push "$IMAGE_ID:$IMAGE_TAG"
+          DIGEST=$(docker images --no-trunc --quiet "$IMAGE_ID:$IMAGE_TAG")
+          echo "::set-output name=image::$IMAGE_ID"
+          echo "::set-output name=digest::$DIGEST"
   gke:
     name: "Deploy to GKE"
     needs: [build-frontend-image, build-api-image]
@@ -102,6 +108,6 @@ jobs:
           ./kustomize version
       - name: Deploy
         run: |
-          ./kustomize edit set image frontend/image=${{ needs.build-frontend-image.outputs.image }}
-          ./kustomize edit set image api/image=${{ needs.build-api-image.outputs.image }}
+          ./kustomize edit set image ${{ needs.build-frontend-image.outputs.image }}@${{ needs.build-frontend-image.outputs.digest }}
+          ./kustomize edit set image ${{ needs.build-api-image.outputs.image }}@${{ needs.build-api-image.outputs.digest }}
           kubectl apply -k .

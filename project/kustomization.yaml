@@ -6,6 +6,5 @@ resources:
 - frontend/manifests/deployment.yaml
 - frontend/manifests/service.yaml
 images:
-- name: api/image
-- name: frontend/image
-  newName: foobar
+- name: ghcr.io/strax/dwk-project-api
+- name: ghcr.io/strax/dwk-project-frontend

@@ -14,4 +14,4 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: frontend/image
+          image: ghcr.io/strax/dwk-project-frontend
