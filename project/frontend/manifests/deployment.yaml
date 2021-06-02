@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: dwk-project
-  name: frontend-dep
+  name: frontend
 spec:
   selector:
     matchLabels:
