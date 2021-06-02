@@ -29,6 +29,7 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - id: build-push
+        name: Build image and push to registry
         run: |
           REVISION="${GITHUB_REF#refs/heads/}-$(git rev-parse --short $GITHUB_SHA)"
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
@@ -54,6 +55,7 @@ jobs:
       - name: Log into registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
       - id: build-push
+        name: Build image and push to registry
         run: |
           REVISION="${GITHUB_REF#refs/heads/}-$(git rev-parse --short $GITHUB_SHA)"
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
