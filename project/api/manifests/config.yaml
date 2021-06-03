@@ -5,7 +5,7 @@ metadata:
   name: api-config
   namespace: dwk-project
 data:
-  PGHOST: postgres
+  PGHOST: postgres.dwk-project.svc.cluster.local
   PGPORT: "5432"
   PGUSER: todos
   PGDATABASE: todos
