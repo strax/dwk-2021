@@ -32,5 +32,9 @@ spec:
             httpGet:
               port: 80
               path: /healthz
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "256Mi"
   strategy:
     type: Recreate

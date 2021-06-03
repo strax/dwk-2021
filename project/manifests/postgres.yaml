@@ -45,6 +45,10 @@ spec:
           - mountPath: /etc/secret/postgres
             name: postgres-secret
             readOnly: true
+        resources:
+          limits:
+            cpu: "300m"
+            memory: "512Mi"
   volumeClaimTemplates:
     - metadata:
         name: pgdata
