@@ -40,7 +40,9 @@ func runMigrations(db *sqlx.DB) {
 func main() {
 	var srv http.Server
 
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	zerolog.LevelFieldName = "severity"
+	zerolog.TimestampFieldName = "timestamp"
+	zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	config := AppConfigFromEnv()
 	db := sqlx.MustConnect("pgx", config.DBConfig.ToPostgresConnectionString())
