@@ -35,3 +35,7 @@ Cons:
 ## Exercise 3.07: Commitment
 
 Since the database is already set up as a StatefulSet and the estimated load of the database is neglible for the project, I chose to use the StatefulSet solution. In addition this avoids GCP lock-in which is important when the credits run out.
+
+## Exercise 3.10: Project v1.6
+
+![Example log entry in Google Cloud Logging](exercise-3.10.png)
