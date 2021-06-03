@@ -31,3 +31,7 @@ Cons:
 * Need to write the KRPs
 * Need to manually manage the database; this would include tuning PostgreSQL parameters and a custom backup solution in a real world usecase
 * Scaling and replicating the database would cause a lot of extra work
+
+## Exercise 3.07: Commitment
+
+Since the database is already set up as a StatefulSet and the estimated load of the database is neglible for the project, I chose to use the StatefulSet solution. In addition this avoids GCP lock-in which is important when the credits run out.
