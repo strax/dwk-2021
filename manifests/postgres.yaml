@@ -19,6 +19,7 @@ spec:
         - name: postgres-secret
           secret:
             secretName: postgres-secret
+      priorityClassName: db
       containers:
       - name: postgres
         image: postgres:13.0
@@ -43,6 +44,13 @@ spec:
           - mountPath: /etc/secret/postgres
             name: postgres-secret
             readOnly: true
+        resources:
+          limits:
+            cpu: "100m"
+            memory: "100Mi"
+          requests:
+            cpu: "0m"
+            memory: "20Mi"
   volumeClaimTemplates:
     - metadata:
         name: pgdata

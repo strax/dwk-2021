@@ -1,0 +1,7 @@
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: db
+value: 10000000
+globalDefault: false
+description: "High-priority database services"

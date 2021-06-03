@@ -34,7 +34,7 @@ spec:
               path: /healthz
           resources:
             limits:
-              cpu: "150m"
+              cpu: "100m"
               memory: "256Mi"
   strategy:
     type: Recreate
