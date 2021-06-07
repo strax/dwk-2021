@@ -70,12 +70,7 @@ func main() {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("X-Request-Id", middleware.GetReqID(r.Context()))
-			next.ServeHTTP(w, r)
-		})
-	})
+	r.Use(requestIdHeader)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.NoCache)
 	r.Use(middleware.Recoverer)
@@ -83,28 +78,11 @@ func main() {
 	r.Use(middleware.Heartbeat("/healthz"))
 
 	// The rest of the middlewares and routes have the prefix stripped out of the URL path
-	r.Use(func(next http.Handler) http.Handler {
-		return http.StripPrefix(config.PathPrefix, next)
-	})
+	r.Use(stripPrefix(config.PathPrefix))
 
 	r.Use(hlog.NewHandler(log.Logger))
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			requestId := middleware.GetReqID(r.Context())
-			newLog := hlog.FromRequest(r).With().Str("requestId", requestId).Logger()
-			wrap := hlog.NewHandler(newLog)
-			wrap(next).ServeHTTP(w, r)
-		})
-	})
-	r.Use(hlog.AccessHandler(func(r *http.Request, status, size int, duration time.Duration) {
-		log.Ctx(r.Context()).Trace().
-			Str("method", r.Method).
-			Stringer("url", r.URL).
-			Int("status", status).
-			Int("size", size).
-			Dur("duration", duration).
-			Msg("request")
-	}))
+	r.Use(requestIdLogger)
+	r.Use(requestLogger)
 
 	app := App{DB: db, Config: config}
 
