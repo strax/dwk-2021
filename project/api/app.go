@@ -12,6 +12,11 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+type App struct {
+	DB     *sqlx.DB
+	Config AppConfig
+}
+
 // Fields of a Todo which are not generated.
 type NewTodo struct {
 	Text string `json:"text" db:"text"`
@@ -32,7 +37,7 @@ func respondJSON(w http.ResponseWriter, v interface{}, statusCode int) {
 	}
 }
 
-func GetImage(w http.ResponseWriter, r *http.Request) {
+func (app *App) GetImage(w http.ResponseWriter, r *http.Request) {
 	f, err := os.Open("/mnt/volume1/picsum-400-400.webp")
 	if err != nil {
 		panic(err)
@@ -45,17 +50,16 @@ func GetImage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func ListTodos(w http.ResponseWriter, r *http.Request) {
+func (app *App) ListTodos(w http.ResponseWriter, r *http.Request) {
 	todos := make([]Todo, 0)
-	db := r.Context().Value("db").(*sqlx.DB)
-	err := db.Select(&todos, "SELECT * FROM todo")
+	err := app.DB.Select(&todos, "SELECT * FROM todo")
 	if err != nil {
 		panic(err)
 	}
 	respondJSON(w, todos, http.StatusOK)
 }
 
-func CreateTodo(w http.ResponseWriter, r *http.Request) {
+func (app *App) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 	data := &NewTodo{}
 	if err := decoder.Decode(data); err != nil {
@@ -68,20 +72,13 @@ func CreateTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer r.Body.Close()
-	id, err := uuid.NewUUID()
-	if err != nil {
-		panic(err)
-	}
+	id := uuid.Must(uuid.NewRandom())
 	todo := Todo{
 		Id:        id,
 		Text:      data.Text,
 		CreatedAt: time.Now(),
 	}
-	db := r.Context().Value("db").(*sqlx.DB)
-	_, err = db.NamedExec("INSERT INTO todo (id, text, created_at) VALUES (:id, :text, :created_at)", todo)
-	if err != nil {
-		panic(err)
-	}
+	app.DB.MustExec("INSERT INTO todo (id, text, created_at) VALUES (:id, :text, :created_at)", todo)
 	log.Info().Stringer("id", todo.Id).Str("text", todo.Text).Msg("Created new todo")
 	respondJSON(w, todo, http.StatusCreated)
 }

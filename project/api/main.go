@@ -2,16 +2,17 @@ package main
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/hlog"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/hlog"
+	"github.com/rs/zerolog/log"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -104,16 +105,12 @@ func main() {
 			Dur("duration", duration).
 			Msg("request")
 	}))
-	r.Use(func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := context.WithValue(r.Context(), "db", db)
-			next.ServeHTTP(w, r.WithContext(ctx))
-		})
-	})
 
-	r.Get("/image", GetImage)
-	r.Post("/todos", CreateTodo)
-	r.Get("/todos", ListTodos)
+	app := App{DB: db, Config: config}
+
+	r.Get("/image", app.GetImage)
+	r.Post("/todos", app.CreateTodo)
+	r.Get("/todos", app.ListTodos)
 
 	srv = http.Server{
 		Addr:    "[::]:80",
