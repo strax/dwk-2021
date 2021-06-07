@@ -3,15 +3,14 @@ package main
 import (
 	"bufio"
 	"encoding/json"
-	"github.com/google/uuid"
-	"github.com/jmoiron/sqlx"
-	"github.com/rs/zerolog/log"
 	"net/http"
 	"os"
 	"time"
-)
 
-var db = make(map[uuid.UUID]Todo)
+	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
+	"github.com/rs/zerolog/log"
+)
 
 // Fields of a Todo which are not generated.
 type NewTodo struct {

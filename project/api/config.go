@@ -9,7 +9,7 @@ import (
 func MustLookupEnv(key string) string {
 	value, ok := os.LookupEnv(key)
 	if !ok {
-		panic(fmt.Sprintf("Environment value %s not is not present"))
+		panic(fmt.Sprintf("Environment value %s not is not present", value))
 	}
 	return value
 }
