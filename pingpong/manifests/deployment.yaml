@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: pingpong
-          image: eu.gcr.io/strax-dwk/pingpong@sha256:38299538376d08238f99c18a2ba69a5829fca0431269de0d1970ff46fbd6f14f
+          image: eu.gcr.io/strax-dwk/pingpong@sha256:51a334b675e648e9c199cc4cba40ecf2f005cf4dc1e507786e727d176cb625d8
           envFrom:
             - configMapRef:
                 name: pingpong-config

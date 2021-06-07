@@ -10,15 +10,16 @@ use futures::future::select;
 use tokio::pin;
 use tokio::signal::unix::{signal, SignalKind};
 use tokio::sync::watch;
-use tracing::{info, debug, Level};
-use tracing::instrument::Instrument;
+use tracing::{info, Level};
 use tracing_subscriber::{EnvFilter};
 use warp::Filter;
 use tonic::transport::Server as GrpcServer;
 use sqlx::postgres::{PgPoolOptions};
 
 use config::Config;
-use sqlx::migrate::Migrator;
+use tonic_health::server::HealthReporter;
+use crate::app::App;
+use std::time::Duration;
 
 async fn signal_handler(notification: watch::Sender<()>) {
     let mut sigint = signal(SignalKind::interrupt()).unwrap();
@@ -31,10 +32,18 @@ async fn signal_handler(notification: watch::Sender<()>) {
     notification.send(()).unwrap();
 }
 
-static MIGRATOR: Migrator = sqlx::migrate!();
-
-pub fn health_check() -> warp::filters::BoxedFilter<(impl warp::Reply,)> {
-    warp::path("health").map(|| ".").boxed()
+async fn check_service_health(app: Arc<App>, mut health_reporter: HealthReporter) {
+    loop {
+        match app.db.acquire().await {
+            Ok(_) => {
+                health_reporter.set_serving::<grpc::PingpongServiceServer<grpc::Endpoint>>().await;
+            },
+            Err(_) => {
+                health_reporter.set_not_serving::<grpc::PingpongServiceServer<grpc::Endpoint>>().await;
+            }
+        }
+        tokio::time::sleep(Duration::from_secs(5)).await;
+    }
 }
 
 #[tokio::main]
@@ -48,18 +57,12 @@ pub async fn main() {
     tokio::task::spawn(signal_handler(tx));
 
     let config = Config::from_env().unwrap();
-    let db = PgPoolOptions::new().max_connections(5).connect_with(config.database).await.unwrap();
-
-    async {
-        debug!("start");
-        MIGRATOR.run(&db).await.expect("failed to run migrations");
-        debug!("done");
-    }.instrument(tracing::info_span!("migrations")).await;
-
+    let db = PgPoolOptions::new().max_connections(5).connect_lazy_with(config.database);
 
     let state = Arc::new(app::App::new(db));
 
-    let routes = app::routes::ping(state.clone())
+    let routes = app::routes::health(state.clone())
+        .or(app::routes::ping(state.clone()))
         .or(app::routes::stats(state.clone()))
         .with(warp::trace::request());
     let routes = match config.base_path {
@@ -74,13 +77,19 @@ pub async fn main() {
     };
 
     let mut rx2 = rx.clone();
-    let (http_addr, server) = warp::serve(routes.or(health_check()))
+    let (http_addr, server) = warp::serve(routes)
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), config.port), async move {
             rx2.changed().await.ok();
         });
     let http = tokio::task::spawn(server);
     info!(addr = %http_addr, "http.up");
+
+    let (health_reporter, health_service) = tonic_health::server::health_reporter();
+
+    tokio::spawn(check_service_health(state.clone(), health_reporter));
+
     let grpc = GrpcServer::builder()
+        .add_service(health_service)
         .add_service(grpc::PingpongServiceServer::new(grpc::Endpoint::new(state.clone())))
         .serve_with_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), 50051), async move {
             rx.changed().await.ok();
