@@ -11,13 +11,13 @@ spec:
         path: /pingpong
         backend:
           service:
-            name: pingpong-svc
+            name: pingpong
             port:
               number: 80
       - pathType: ImplementationSpecific
         path: /
         backend:
           service:
-            name: main-app-svc
+            name: main-app
             port:
               number: 80

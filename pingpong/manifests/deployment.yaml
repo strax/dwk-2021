@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: dwk-exercises
-  name: pingpong-dep
+  name: pingpong
 spec:
   selector:
     matchLabels:

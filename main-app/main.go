@@ -54,7 +54,7 @@ func main() {
 		close(exit)
 	}()
 
-	conn, err := grpc.Dial("pingpong-svc:50051", grpc.WithInsecure())
+	conn, err := grpc.Dial("pingpong:50051", grpc.WithInsecure())
 	if err != nil {
 		panic(err)
 	}

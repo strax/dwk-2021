@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   namespace: dwk-exercises
-  name: main-app-dep
+  name: main-app
 spec:
   selector:
     matchLabels:
@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: main-app
-          image: eu.gcr.io/strax-dwk/main-app@sha256:61f9a6b3a86153417e0a41a578e74fe6bb907ee5f7cb40bf41afc3aa70314fa9
+          image: eu.gcr.io/strax-dwk/main-app@sha256:356f8360daf0bc90371044509647f360ff41ea57a4c0a8aea91c83b3c4aae367
           env:
             - name: MESSAGE
               valueFrom:
