@@ -17,7 +17,7 @@ impl App {
         App { db }
     }
 
-    pub async fn count_pings(&self) -> Result<i64, Box<dyn Error>> {
+    pub async fn count_pings(&self) -> Result<u32, Box<dyn Error>> {
         let value = sqlx::query_scalar("SELECT COUNT(*) FROM pings").fetch_one(&self.db).await?;
         Ok(value)
     }
@@ -30,7 +30,7 @@ impl App {
 
 #[derive(Serialize)]
 struct StatsResponse {
-    pings: i64
+    pings: u32
 }
 
 pub fn with_state(state: Arc<App>) -> BoxedFilter<(Arc<App>, )> {

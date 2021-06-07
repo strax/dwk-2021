@@ -17,9 +17,6 @@ use tonic::transport::Server as GrpcServer;
 use sqlx::postgres::{PgPoolOptions};
 
 use config::Config;
-use tonic_health::server::HealthReporter;
-use crate::app::App;
-use std::time::Duration;
 
 async fn signal_handler(notification: watch::Sender<()>) {
     let mut sigint = signal(SignalKind::interrupt()).unwrap();
@@ -30,20 +27,6 @@ async fn signal_handler(notification: watch::Sender<()>) {
     pin!(sigterm);
     select(sigint, sigterm).await;
     notification.send(()).unwrap();
-}
-
-async fn check_service_health(app: Arc<App>, mut health_reporter: HealthReporter) {
-    loop {
-        match app.db.acquire().await {
-            Ok(_) => {
-                health_reporter.set_serving::<grpc::PingpongServiceServer<grpc::Endpoint>>().await;
-            },
-            Err(_) => {
-                health_reporter.set_not_serving::<grpc::PingpongServiceServer<grpc::Endpoint>>().await;
-            }
-        }
-        tokio::time::sleep(Duration::from_secs(5)).await;
-    }
 }
 
 #[tokio::main]
@@ -61,8 +44,7 @@ pub async fn main() {
 
     let state = Arc::new(app::App::new(db));
 
-    let routes = app::routes::health(state.clone())
-        .or(app::routes::ping(state.clone()))
+    let routes = app::routes::ping(state.clone())
         .or(app::routes::stats(state.clone()))
         .with(warp::trace::request());
     let routes = match config.base_path {
@@ -77,20 +59,15 @@ pub async fn main() {
     };
 
     let mut rx2 = rx.clone();
-    let (http_addr, server) = warp::serve(routes)
+    let (http_addr, server) = warp::serve(app::routes::health(state.clone()).or(routes))
         .bind_with_graceful_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), config.port), async move {
             rx2.changed().await.ok();
         });
     let http = tokio::task::spawn(server);
     info!(addr = %http_addr, "http.up");
 
-    let (health_reporter, health_service) = tonic_health::server::health_reporter();
-
-    tokio::spawn(check_service_health(state.clone(), health_reporter));
-
     let grpc = GrpcServer::builder()
-        .add_service(health_service)
-        .add_service(grpc::PingpongServiceServer::new(grpc::Endpoint::new(state.clone())))
+        .add_service(grpc::PingpongServiceServer::new(grpc::PingpongServiceHandler::new(state.clone())))
         .serve_with_shutdown(SocketAddr::new(IpAddr::from_str("::").unwrap(), 50051), async move {
             rx.changed().await.ok();
         });

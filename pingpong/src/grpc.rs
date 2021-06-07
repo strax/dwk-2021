@@ -11,20 +11,22 @@ mod proto {
     tonic::include_proto!("pingpong");
 }
 
-pub struct Endpoint {
+pub struct PingpongServiceHandler {
     state: Arc<App>
 }
 
-impl Endpoint {
+impl PingpongServiceHandler {
     pub fn new(state: Arc<App>) -> Self {
-        Endpoint { state }
+        PingpongServiceHandler { state }
     }
 }
 
 #[tonic::async_trait]
-impl PingpongService for Endpoint {
+impl PingpongService for PingpongServiceHandler {
     async fn get_stats(&self, _: Request<()>) -> Result<Response<Stats>, Status> {
-        let pings = self.state.count_pings().await.unwrap() as u64;
-        Ok(Response::new(Stats { pings }))
+        match self.state.count_pings().await {
+            Err(_) => Err(Status::unavailable("Failed to fetch pings")),
+            Ok(pings) => Ok(Response::new(Stats { pings }))
+        }
     }
 }

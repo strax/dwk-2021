@@ -2,10 +2,12 @@ syntax = "proto3";
 
 package pingpong;
 
+option go_package = "github.com/strax/dwk-2021/protos/pingpong";
+
 import "google/protobuf/empty.proto";
 
 message Stats {
-    uint64 pings = 1;
+    uint32 pings = 1;
 }
 
 service PingpongService {

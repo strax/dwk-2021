@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: main-app
-          image: eu.gcr.io/strax-dwk/main-app@sha256:bc483763520947bf6b04e39a12fc61d9969f9f8759af6be6f88839ad06410328
+          image: eu.gcr.io/strax-dwk/main-app@sha256:61f9a6b3a86153417e0a41a578e74fe6bb907ee5f7cb40bf41afc3aa70314fa9
           env:
             - name: MESSAGE
               valueFrom:
@@ -24,8 +24,7 @@ spec:
           readinessProbe:
             httpGet:
               port: 80
-              path: /health
-            initialDelaySeconds: 30
+              path: /healthz
           resources:
             limits:
               cpu: "150m"

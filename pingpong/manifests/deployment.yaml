@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: pingpong
-          image: eu.gcr.io/strax-dwk/pingpong@sha256:51a334b675e648e9c199cc4cba40ecf2f005cf4dc1e507786e727d176cb625d8
+          image: eu.gcr.io/strax-dwk/pingpong@sha256:c9a5a3d75a0a05a6f7dafef3ce229de71c46dc7925ee41624c95a08c5e5c6935
           envFrom:
             - configMapRef:
                 name: pingpong-config
@@ -23,8 +23,7 @@ spec:
           readinessProbe:
             httpGet:
               port: 80
-              path: /health
-            initialDelaySeconds: 30
+              path: /healthz
           resources:
             limits:
               cpu: "150m"

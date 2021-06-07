@@ -1,20 +1,24 @@
 # syntax=docker/dockerfile:1.2
 
-FROM rust:1.52.1-alpine AS builder
+FROM rust:1.52.1 AS base
 RUN rustup component add rustfmt
-RUN apk add protoc musl-dev --update-cache && \
-    apk add sccache \
-        --update-cache \
-        --repository http://dl-3.alpinelinux.org/alpine/edge/testing/ \
-        --allow-untrusted
-ENV SCCACHE_CACHE_SIZE="1G"
-ENV SCCACHE_DIR="/cache/sccache"
-ENV RUSTC_WRAPPER="sccache"
-
+RUN cargo install cargo-chef
+ENV CARGO_INCREMENTAL=false
 WORKDIR /build
-COPY . /build/
-RUN cargo fetch
-RUN --mount=type=cache,target=/cache/sccache cargo build --frozen --release && sccache --show-stats
+
+FROM base AS planner
+COPY . .
+RUN cargo chef prepare --recipe-path recipe.json
+
+FROM base AS cacher
+COPY --from=planner /build/recipe.json recipe.json
+RUN cargo chef cook --release --recipe-path recipe.json
+
+FROM base AS builder
+COPY . .
+COPY --from=cacher /build/target target
+COPY --from=cacher /usr/local/cargo /usr/local/cargo
+RUN cargo build --release --frozen
 
 FROM gcr.io/distroless/cc AS runtime
 EXPOSE 80
