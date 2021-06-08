@@ -1,0 +1,30 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  namespace: dwk-project
+  name: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: nginx
+          image: ghcr.io/strax/dwk-project-frontend
+          imagePullPolicy: Always
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "256Mi"
+  strategy:
+    blueGreen:
+      activeService: frontend
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 600 # 10 minutes
+      postPromotionAnalysis:
+        templates:
+          - templateName: cpu-threshold

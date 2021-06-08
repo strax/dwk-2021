@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  namespace: dwk-project
+  name: api
+spec:
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      volumes:
+        - name: volume1
+          persistentVolumeClaim:
+            claimName: project-pvc
+            readOnly: true
+      containers:
+        - name: api
+          image: ghcr.io/strax/dwk-project-api
+          imagePullPolicy: Always
+          volumeMounts:
+            - mountPath: /mnt/volume1
+              name: volume1
+          envFrom:
+            - configMapRef:
+                name: api-config
+            - secretRef:
+                name: api-secret
+          readinessProbe:
+            httpGet:
+              port: 80
+              path: /healthz
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "256Mi"
+  strategy:
+    blueGreen:
+      activeService: api
+      autoPromotionEnabled: true
+      scaleDownDelaySeconds: 600 # 10 minutes
+      postPromotionAnalysis:
+        templates:
+          - templateName: cpu-threshold

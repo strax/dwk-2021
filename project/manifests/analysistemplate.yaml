@@ -1,0 +1,13 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  namespace: dwk-project
+  name: cpu-threshold
+spec:
+  metrics:
+  - name: cpu-threshold
+    failureCondition: result >= 0.85
+    provider:
+      prometheus:
+        address: kube-prometheus-stack-1623-prometheus.prometheus.svc.cluster.local
+        query: sum(node_namespace_pod_container:container_cpu_usage_seconds_total:sum_rate{namespace="dwk-project"})
