@@ -9,4 +9,4 @@ data:
   PGPORT: "5432"
   PGUSER: todos
   PGDATABASE: todos
-  PATH_PREFIX: /api
+  PATH_PREFIX: "/api"

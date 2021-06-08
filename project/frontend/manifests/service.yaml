@@ -4,7 +4,7 @@ metadata:
   namespace: dwk-project
   name: frontend
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: frontend
   ports:

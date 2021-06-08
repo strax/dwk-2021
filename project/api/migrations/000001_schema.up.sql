@@ -1,5 +1,0 @@
-CREATE TABLE todo(
-    id UUID PRIMARY KEY,
-    text TEXT NOT NULL,
-    created_at TIMESTAMP WITH TIME ZONE
-);

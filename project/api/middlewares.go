@@ -25,7 +25,7 @@ var requestLogger = hlog.AccessHandler(func(r *http.Request, status, size int, d
 		Msg("request")
 })
 
-var requestIdLogger = func(next http.Handler) http.Handler {
+func requestIdLogger(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestId := middleware.GetReqID(r.Context())
 		newLog := hlog.FromRequest(r).With().Str("requestId", requestId).Logger()
@@ -34,7 +34,7 @@ var requestIdLogger = func(next http.Handler) http.Handler {
 	})
 }
 
-var requestIdHeader = func(next http.Handler) http.Handler {
+func requestIdHeader(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("X-Request-Id", middleware.GetReqID(r.Context()))
 		next.ServeHTTP(w, r)

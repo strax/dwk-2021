@@ -3,11 +3,8 @@ kind: Service
 metadata:
   namespace: dwk-project
   name: api
-  annotations:
-    cloud.google.com/backend-config: |
-      {"ports": { "80": "http-backendconfig" } }
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: api
   ports:

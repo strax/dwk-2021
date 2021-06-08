@@ -16,27 +16,7 @@ import (
 
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/jmoiron/sqlx"
-
-	"github.com/golang-migrate/migrate/v4"
-	"github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
-
-func runMigrations(db *sqlx.DB) {
-	start := time.Now()
-	driver, err := postgres.WithInstance(db.DB, &postgres.Config{})
-	if err != nil {
-		panic(err)
-	}
-	m, err := migrate.NewWithDatabaseInstance("file:///migrations", "postgres", driver)
-	if err != nil {
-		panic(err)
-	}
-	if err := m.Up(); err != migrate.ErrNoChange {
-		panic(err)
-	}
-	log.Info().Msgf("Ran migrations in %v ms", time.Since(start).Milliseconds())
-}
 
 func main() {
 	var srv http.Server
@@ -46,11 +26,9 @@ func main() {
 	zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	config := AppConfigFromEnv()
-	db := sqlx.MustConnect("pgx", config.DBConfig.ToPostgresConnectionString())
+	db := sqlx.MustOpen("pgx", config.DBConfig.ToPostgresConnectionString())
 
 	log.Info().Msgf("Service path prefix: %v", config.PathPrefix)
-
-	runMigrations(db)
 
 	exit := make(chan struct{})
 	go func() {
@@ -75,20 +53,20 @@ func main() {
 	r.Use(middleware.NoCache)
 	r.Use(middleware.Recoverer)
 
-	r.Use(middleware.Heartbeat("/healthz"))
-
-	// The rest of the middlewares and routes have the prefix stripped out of the URL path
-	r.Use(stripPrefix(config.PathPrefix))
-
 	r.Use(hlog.NewHandler(log.Logger))
 	r.Use(requestIdLogger)
-	r.Use(requestLogger)
 
 	app := App{DB: db, Config: config}
 
-	r.Get("/image", app.GetImage)
-	r.Post("/todos", app.CreateTodo)
-	r.Get("/todos", app.ListTodos)
+	r.Get("/healthz", app.HealthCheck)
+
+	r.Route(config.PathPrefix, func(r chi.Router) {
+		// The rest of the middlewares and routes have the prefix stripped out of the URL path
+		r.Use(requestLogger)
+		r.Get("/image", app.GetImage)
+		r.Post("/todos", app.CreateTodo)
+		r.Get("/todos", app.ListTodos)
+	})
 
 	srv = http.Server{
 		Addr:    "[::]:80",

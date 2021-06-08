@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"os"
 	"time"
@@ -78,7 +79,22 @@ func (app *App) CreateTodo(w http.ResponseWriter, r *http.Request) {
 		Text:      data.Text,
 		CreatedAt: time.Now(),
 	}
-	app.DB.MustExec("INSERT INTO todo (id, text, created_at) VALUES (:id, :text, :created_at)", todo)
+	_, err := app.DB.NamedExec("INSERT INTO todo (id, text, created_at) VALUES (:id, :text, :created_at)", todo)
+	if err != nil {
+		panic(err)
+	}
 	log.Info().Stringer("id", todo.Id).Str("text", todo.Text).Msg("Created new todo")
 	respondJSON(w, todo, http.StatusCreated)
+}
+
+// HealthCheck returns 200 OK if the connection to the database is healthy and 503 Service Unavailable otherwise.
+func (app *App) HealthCheck(w http.ResponseWriter, r *http.Request) {
+	err := app.DB.Ping()
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusServiceUnavailable), http.StatusServiceUnavailable)
+		return
+	}
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
+	fmt.Fprintln(w, http.StatusText(http.StatusOK))
 }
