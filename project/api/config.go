@@ -16,6 +16,7 @@ func MustLookupEnv(key string) string {
 
 type AppConfig struct {
 	PathPrefix string
+	NatsURL    string
 	DBConfig
 }
 
@@ -30,7 +31,8 @@ type DBConfig struct {
 func AppConfigFromEnv() AppConfig {
 	dbConfig := DBConfigFromEnv()
 	pathPrefix, _ := os.LookupEnv("PATH_PREFIX")
-	return AppConfig{pathPrefix, dbConfig}
+	natsURL := MustLookupEnv("NATS_URL")
+	return AppConfig{pathPrefix, natsURL, dbConfig}
 }
 
 func DBConfigFromEnv() DBConfig {

@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: dwk-project
+  name: broadcaster
+spec:
+  selector:
+    matchLabels:
+      app: broadcaster
+  template:
+    metadata:
+      labels:
+        app: broadcaster
+    spec:
+      containers:
+        - name: broadcaster
+          image: ghcr.io/strax/dwk-project-broadcaster
+          imagePullPolicy: Always
+          env:
+            - name: TELEGRAM_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-api-token
+                  key: token
+            - name: TELEGRAM_CHANNEL_ID
+              valueFrom:
+                secretKeyRef:
+                  name: telegram-channel-id
+                  key: id
+          envFrom:
+            - configMapRef:
+                name: broadcaster-config
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"

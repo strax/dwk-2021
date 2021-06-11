@@ -1,0 +1,16 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: telegram-channel-id
+  namespace: dwk-project
+spec:
+  encryptedData:
+    id: AgA1N5wUqCBYE3cZ9MIPLdjCWVLKnilBMkKWDxKnH0om9/6UrTQvzFYRTIKhj/knhb5Ts9HGePpNp27cuZsfIrPuMRyvqHP0zr6euMOxz5q6Kuo7lGp539Fs1UPu96GSo0Ngp4Cb/lQxg9CIzqfS/vXQaMVzsd1tUwknYZ+C05yjKYzLP28q7rtY0lCOOxCqhxXemTBGkq6vyylue3Pc5bySjn9xQO5rpEyqogiA2dCCo3H6HyRwad57KzSFBYlVfInRk7ziFUvhv1ifX8GjR21z66OJlzpui+pMeorayJjRisGhwwaT6D3LTVHfQEed6Lv+nSVBYDXcDhkGPMMIHabeTbW/+kDZUc81UZvD25YNE3nwl94BBg3xdAGy2XhCvH+1H7pENAyq5VtzQdWhQHeqTtzVJKh/T7zpjmFtX3zTx2z6aHx93ftddjdvV3A091EKh7WUAArOQ7JzA21l40WFZxHBG/wumecbm8+5nAiseNS+2cV+8R9oz9huzMT6Ym8auyU98qPR4qgGSHlEmD4RQYKSfeq2jbJBLR2Wb58Ij/3k9QVkdolmjGAf2w5ayFJvRfbUSwdQ9KF/wSfru3UK9m/XEw9qiCzb0VEc/I3S9O5Yls0IhdQ8dnVHip1Ba2tzOc4lfcPnVvz3DrHoXjQGFaQEp+L9kzzuI3nPZfxwxLJx3mzF6SYzBvrBuRoOIelRSY7SXk5XMg2ATcXNLA==
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: telegram-channel-id
+      namespace: dwk-project
+

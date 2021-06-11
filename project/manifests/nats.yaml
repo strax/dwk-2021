@@ -1,0 +1,30 @@
+---
+apiVersion: helm.fluxcd.io/v1
+kind: HelmRelease
+metadata:
+  name: nats
+  namespace: dwk-project
+spec:
+  chart:
+    repository: https://nats-io.github.io/k8s/helm/charts/
+    name: nats
+    version: 0.8.0
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: dwk-project-nats
+  namespace: prometheus
+  labels:
+    release: kube-prometheus-stack-1623060733
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nats
+  endpoints:
+    - interval: 10s
+      path: /metrics
+      port: metrics
+  namespaceSelector:
+    matchNames:
+      - dwk-project

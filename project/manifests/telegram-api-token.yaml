@@ -1,0 +1,16 @@
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: telegram-api-token
+  namespace: dwk-project
+spec:
+  encryptedData:
+    token: AgBSlTWc93T/hM6/T1tTNtvyXWkzGsJFkR3/xAZPqmYgEC+PgbKdSR4cuTsSFyqiJ+l80SN/us9iHb6wfjA6LcLYmwCrrBE5FJxF+S5qv+XvwapU0b/lsQzRFyvavcA19IkrbGVqHq9IJXFZjh8HoYb9L7i/huPWumqT4tCj6VzIXQnEGYKpsoyipTY/7PMXufXJE6TfoCdeHvIeXgZVQqQytUoyBGzcH83zHyvxVNPGOHyqSU/K65jnC7ouVUbPOIQ0r9plDqfCFoIT+BT8+2JmWGcJlC4zOMG/lHt9NtqRBFdIMI8nCSJkBZm9TAObXuH4/v6kTd6K8/uNIm0bhX605r0Zn19na6jDztOhHrZAHy7t8pBW9TPoydVzNxSNy9DUxUk3HW115x7LMMx2q9rCfOPKcWOXC01EpQ3W0Udk6kyFnYH3z6nhj9ZB9o9J7QARAr/O7XjwuyASaM7t7/xUuYc5QizOMNAXMCKKdiZY200a3Iek1XhmF7r8Nppjptc0rbJKgx2TJd91+Q/Eitg2zlvirq61XBPq6gVFXnc0tpP+HNWISYecaEF+qPOcRx4nzsa2FgyPADS/vl/f0DnZBK7c92TGf/uBQp6606JBbI3uvmy6RJL/jyhuiD0JI9aljPQM04GBNdEIsdw02a7MhN5C7ukLyUGkt2z/tJ/7gq0NZb3x3x3uq62ufmRKK+NID06C/N+kcmNZxHyYATgnnVYpi8Y7Y3ltK9FSL2WkvkilQHNWCIXcKNxZ8QLo
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: telegram-api-token
+      namespace: dwk-project
+

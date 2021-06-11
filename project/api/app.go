@@ -12,12 +12,14 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog/log"
 )
 
 type App struct {
-	DB     *pgxpool.Pool
-	Config AppConfig
+	DB           *pgxpool.Pool
+	Config       AppConfig
+	MessageQueue *nats.EncodedConn
 }
 
 // Fields of a Todo which are not generated.
@@ -65,7 +67,7 @@ func (app *App) ListTodos(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer rows.Close()
-	var todos []*Todo
+	var todos = make([]*Todo, 0)
 	pgxscan.ScanAll(&todos, rows)
 	respondJSON(w, todos, http.StatusOK)
 }
@@ -99,6 +101,7 @@ func (app *App) CreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 
 	log.Info().Stringer("id", todo.Id).Str("text", todo.Text).Msg("Created new todo")
+	app.MessageQueue.Publish("todos", todo)
 	respondJSON(w, todo, http.StatusCreated)
 }
 

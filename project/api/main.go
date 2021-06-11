@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
@@ -36,6 +37,18 @@ func main() {
 	dbConfig.ConnConfig.LogLevel = pgx.LogLevelTrace
 	dbConfig.ConnConfig.Logger = pgxzerolog.NewLogger(log.Logger)
 	db, err := pgxpool.ConnectConfig(context.Background(), dbConfig)
+	if err != nil {
+		panic(err)
+	}
+
+	log.Info().Msg("Connecting to NATS server...")
+	nc, _ := nats.Connect(config.NatsURL, nats.RetryOnFailedConnect(true), nats.ReconnectHandler(func(conn *nats.Conn) {
+		log.Warn().Msg("Reconnecting to NATS server")
+	}))
+	if nc.IsConnected() {
+		log.Info().Msg("Connected to NATS server")
+	}
+	ec, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	if err != nil {
 		panic(err)
 	}
@@ -68,7 +81,7 @@ func main() {
 	r.Use(hlog.NewHandler(log.Logger))
 	r.Use(requestIdLogger)
 
-	app := App{DB: db, Config: config}
+	app := App{DB: db, Config: config, MessageQueue: ec}
 
 	r.Get("/healthz", app.HealthCheck)
 

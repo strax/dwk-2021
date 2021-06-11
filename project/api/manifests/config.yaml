@@ -10,3 +10,4 @@ data:
   PGUSER: todos
   PGDATABASE: todos
   PATH_PREFIX: "/api"
+  NATS_URL: nats://dwk-project-nats:4222
