@@ -3,6 +3,7 @@ WORKDIR /build
 COPY package.json package-lock.json /build/
 RUN npm ci
 COPY . /build/
+RUN npm run -s check
 RUN npx webpack --env production
 
 FROM nginx

@@ -1,15 +1,20 @@
-import React, { useTransition } from "react"
-import { createTodo, fetchTodos } from "./api"
+import React, { useTransition, Suspense, useState } from "react"
+import { createTodo, fetchTodos, updateTodo } from "./api"
 import { AsyncResource } from "./Resource"
-import { Suspense, useState } from "react"
 import { TodoList } from "./TodoList"
 import { NewTodoFormlet } from "./NewTodoFormlet"
-import { Card, majorScale, Pane } from "evergreen-ui"
-import { Spinner, Heading } from "evergreen-ui"
+import { majorScale, Pane, Spinner, Heading, toaster } from "evergreen-ui"
 
 import styles from "./App.module.css"
 
 const initialTodos = new AsyncResource(fetchTodos())
+
+function showErrorToast(error: unknown) {
+  console.error(error)
+  toaster.danger("Something went wrong", {
+    description: error instanceof Error ? error.message : String(error),
+  })
+}
 
 export function App() {
   const [todos, setTodos] = useState(initialTodos)
@@ -19,6 +24,17 @@ export function App() {
     startTransition(async () => {
       await createTodo(text)
       setTodos(new AsyncResource(fetchTodos()))
+    })
+  }
+
+  async function onTodoDoneChange(id: string, done: boolean) {
+    startTransition(async () => {
+      try {
+        await updateTodo(id, { done })
+        setTodos(new AsyncResource(fetchTodos()))
+      } catch (err) {
+        showErrorToast(err)
+      }
     })
   }
 
@@ -38,9 +54,7 @@ export function App() {
               <Spinner />
             </Pane>
           }>
-          <Card elevation={0} marginBottom={majorScale(2)}>
-            <TodoList resource={todos} />
-          </Card>
+          <TodoList resource={todos} onDoneChange={onTodoDoneChange} />
         </Suspense>
       </div>
     </React.Fragment>

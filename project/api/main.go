@@ -14,8 +14,10 @@ import (
 	"github.com/rs/zerolog/hlog"
 	"github.com/rs/zerolog/log"
 
+	"github.com/jackc/pgx/v4"
+	pgxzerolog "github.com/jackc/pgx/v4/log/zerologadapter"
+	"github.com/jackc/pgx/v4/pgxpool"
 	_ "github.com/jackc/pgx/v4/stdlib"
-	"github.com/jmoiron/sqlx"
 )
 
 func main() {
@@ -26,7 +28,17 @@ func main() {
 	zerolog.TimeFieldFormat = time.RFC3339Nano
 
 	config := AppConfigFromEnv()
-	db := sqlx.MustOpen("pgx", config.DBConfig.ToPostgresConnectionString())
+	dbConfig, err := pgxpool.ParseConfig(config.ToPostgresConnectionString())
+	if err != nil {
+		panic(err)
+	}
+	dbConfig.LazyConnect = true
+	dbConfig.ConnConfig.LogLevel = pgx.LogLevelTrace
+	dbConfig.ConnConfig.Logger = pgxzerolog.NewLogger(log.Logger)
+	db, err := pgxpool.ConnectConfig(context.Background(), dbConfig)
+	if err != nil {
+		panic(err)
+	}
 
 	log.Info().Msgf("Service path prefix: %v", config.PathPrefix)
 
@@ -65,6 +77,7 @@ func main() {
 		r.Use(requestLogger)
 		r.Get("/image", app.GetImage)
 		r.Post("/todos", app.CreateTodo)
+		r.Put("/todos/{id}", app.UpdateTodo)
 		r.Get("/todos", app.ListTodos)
 	})
 

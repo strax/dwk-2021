@@ -9,9 +9,17 @@
   margin: 0;
   padding: 0;
   padding: 10px 24px;
-  display: flex;
-  flex-direction: column;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-template-columns: max-content auto;
+  align-items: center;
+  gap: 24px;
 }
 .todoListItem:not(:last-child) {
   border-bottom: 1px solid #f4f5f9;
+}
+
+.todoListItemText {
+  display: flex;
+  flex-direction: column;
 }

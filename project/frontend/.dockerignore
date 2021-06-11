@@ -2,3 +2,4 @@ manifests
 node_modules
 .vscode
 assets
+*.tsbuildinfo
