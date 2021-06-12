@@ -72,3 +72,19 @@ spec:
   ports:
   - port: 5432
     targetPort: postgres
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: postgres-secret
+  namespace: dwk-exercises
+spec:
+  encryptedData:
+    password: AgCRqIwkz3W+CIPTNJmeHRvGGhdNGIGpiKyx2M+ayyakUceTI7oZjJj3dCn5Wfs70MC3/+JWVoncYDRmfOOv6uB+FtXLy9Lh7jT7hATLiXyIPuaeGD8NnnD6+eoyp2rd/mFeAFNA8O5PW46G0Pd6D+PcEg9rkYgR8ITljjQJl9PB/c5IkvjqmDy4YMVXLK+kMxbYLZ/Ly+m4NWbKuACVZPOmFZofOsdVzvbHfrEcFBoB0tMeW4383H3jM0Zl766T5XbfDKTv9pVRtFyGnUsJ5RbIObJRzeapnVQC0+swXvnk1e44FIP4840krtaXeFYNmtyPzedRA59V269djleeCLQkKvot7nVL5+r25tXLB9FZ7A51FuVoPQFrWhzYYV6B0PLYvYWnAt4nJIXW04LN+ae/6niREiyeWecep4Fx2VoNu47JmZY0rxScfqtrEzodgXnFOLpydiicSI0kqk5Emsp4g+JYs2VTDbdBwjpOpl0pTignPR6f4OziQqeukqX/zg6WH1WED5xw0fMyN7ixQywITYC1LJN+bjUYJZkxWrlTLyfWHZmJGiN0PWymxIrOJmDYuxZsWhDG8y8rzh+kwEZMh2FEbJ0bAkhwBTdBWd8eyBlkYNPGTQXhkCKSDUCC1AehKhZxaFufZnW7Z056NKonTkClMTUmvw4GU99Z96WVOeoKz3x3aE6lMeZcEyihW8wmPsB38rxhBQ4W
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: postgres-secret
+      namespace: dwk-exercises
