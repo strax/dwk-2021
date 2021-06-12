@@ -15,7 +15,6 @@ spec:
       containers:
         - name: broadcaster
           image: ghcr.io/strax/dwk-project-broadcaster
-          imagePullPolicy: Always
           env:
             - name: TELEGRAM_API_TOKEN
               valueFrom:

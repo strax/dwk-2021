@@ -1,13 +1,21 @@
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
+- manifests/nats.yaml
+- manifests/postgres.yaml
+- manifests/telegram-api-token.yaml
+- manifests/telegram-channel-id.yaml
+- manifests/ingress.yaml
 - api/manifests/config.yaml
 - api/manifests/deployment.yaml
 - api/manifests/service.yaml
 - api/manifests/persistentvolumeclaim.yaml
+- api/manifests/cronjob.yaml
 - frontend/manifests/deployment.yaml
 - frontend/manifests/service.yaml
-- manifests/ingress.yaml
+- broadcaster/manifests/config.yaml
+- broadcaster/manifests/deployment.yaml
 images:
 - name: ghcr.io/strax/dwk-project-api
 - name: ghcr.io/strax/dwk-project-frontend
+- name: ghcr.io/strax/dwk-project-broadcaster

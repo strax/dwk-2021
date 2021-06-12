@@ -20,7 +20,6 @@ spec:
       containers:
         - name: api
           image: ghcr.io/strax/dwk-project-api
-          imagePullPolicy: Always
           volumeMounts:
             - mountPath: /mnt/volume1
               name: volume1
