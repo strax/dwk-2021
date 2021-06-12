@@ -1,0 +1,27 @@
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImageRepository
+metadata:
+  name: frontend
+  namespace: dwk-project
+spec:
+  interval: 1m
+  image: ghcr.io/strax/dwk-project-frontend
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImageRepository
+metadata:
+  name: api
+  namespace: dwk-project
+spec:
+  interval: 1m
+  image: ghcr.io/strax/dwk-project-api
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha1
+kind: ImageRepository
+metadata:
+  name: broadcaster
+  namespace: dwk-project
+spec:
+  interval: 1m
+  image: ghcr.io/strax/dwk-project-broadcaster
+---
