@@ -11,3 +11,19 @@ data:
   PGDATABASE: todos
   PATH_PREFIX: "/api"
   NATS_URL: nats://dwk-project-nats:4222
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: api-secret
+  namespace: dwk-project
+spec:
+  encryptedData:
+    PGPASS: AgB2IVGpGA1XbfMW438EEq/UtIT3KDMmTBDiH4A7w1Ae5CvLLNFSiOLMrXz9tSa+TGBp4c/bLHOVNO8Dz5qO77wmz1QAhVjOR1Z2hrHvObUQ1NRmcppv/zgLoRRiM0fKJgZcjI0sbMOvcwJ9fAhY+WA6V2rey/q+JATJEh4HmKAAr6Tp2zZyEQujSxtc/fDyHV8cXhn9GZ6P5kZC/nlsU/zsXbr+3VH6A+ah6z1cJeAR3h2krRLZOTTYqannbIGFd+0+wOES4WkUNRz4X1TYsDZa96pOSWQIt/QLvGSedz/P+5b2gFfitYVC9O0mvN6McLiAu1M1tX8Efz90knWjv+vYifJLWM7W+55zkA1wTx/fYLP+Rla75+q6r58tNaR790d3+CufGQP/6FI5qtBkJG9wnq9rWUQh2SF3iP+CwcBFN0+WtuMJyjgJPOt4e4qN4rqIxzbx4DqvUlqkQxGqNTy6mXk/xnztawhmbdOjMUDXqS61HPkruTsqjYZfiQb6BkYOoGbNx8RXPT/AFWPSb9/RV9xdQzOxczJR0RaJX4c4ptQRIvHmREjsSfgs87F93K4UmSKJQhtK37yhQIEdpETmetGtoPcUFs9v/velYT7RGTkIS0T1WnXloVl//wYCjSDEWx2S8WijAQmKxenAQypJYsDVjupUsUhpSLgScIc62Y74H0ew/Y28BQa5tv/Y9MhyDx71sQ==
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: api-secret
+      namespace: dwk-project

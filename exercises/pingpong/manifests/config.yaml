@@ -1,3 +1,4 @@
+---
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,3 +11,19 @@ data:
   PGDATABASE: "pingpong"
   PORT: "80"
   BASE_PATH: "pingpong"
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: pingpong-secret
+  namespace: dwk-exercises
+spec:
+  encryptedData:
+    PGPASS: AgBiMFK0wzjfVAngunGKB6V+dD1WvTa8JuOfQ3D35F+gdcfuYP8DFjmo2e472hdPOIR9bmgUHpiL0WqV7ygzB9OZlUHPtq2nZSTTzGPeZOn55JgHwZEUW04e8P9KrjatBbpKImQpa+8YGcUfB9/eY0JThCUe7kSFGdWuchlqKd14e58ZhH+O4+J5FEaT1rk/QcN+mLpkfiqyF5aKe75XMxkmHvjWcq2r4Zf0xNcOhoTJmdU06c0IwSFF0zaTpO+vIOa76R/bDx36IuFjz2c1bD08dc61M7hGX+lPOTJDIpCJNq0ySj7xWg4Q6dqg9AuzifdyDlJmmtHp5PbQNQfSK+VBMAdZX5/gOhKiiUHJRubevjnuQvmwhadRB5UrmZrA2gHwj/+RPl8GVh12e3+PbicA1qR7SNNVENtPpGXMZ4mrvaYwGQmKwVrvGJvTqGWitJu1323r10dZVCqe/Mpx2WhJsKUhda9vs8mpohxhlfhzKZJSK088Jts9BEz7riOwinjt/30m1NUsz5yulQ8+zf6KLgPkNNrcdIaYtYlKKorrr2DsJH4CWYqMCt5QsyAcpNRgz2IC4fegQkFBayaVTKNP4IMzXJSeOCqRM/LZCQQQSr8rfI8y8RDhhk3AvNUJwXoM98/O7BOlXIWuDRKEBcSAz/HnLpA23yWCgsw3yZ09tIUFFVZCvfjGlnPOXyL4Mi9QTYb6bjIDgA==
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: pingpong-secret
+      namespace: dwk-exercises
