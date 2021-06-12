@@ -1,14 +1,19 @@
 ---
-apiVersion: helm.fluxcd.io/v1
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
 kind: HelmRelease
 metadata:
   name: nats
   namespace: dwk-project
 spec:
   chart:
-    repository: https://nats-io.github.io/k8s/helm/charts/
-    name: nats
-    version: 0.8.0
+    spec:
+      chart: nats
+      sourceRef:
+        kind: HelmRepository
+        name: nats
+        namespace: flux-system
+  interval: 1m0s
+  releaseName: nats
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

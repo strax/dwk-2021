@@ -5,4 +5,4 @@ metadata:
   name: broadcaster-config
   namespace: dwk-project
 data:
-  NATS_URL: nats://dwk-project-nats:4222
+  NATS_URL: nats://nats:4222
