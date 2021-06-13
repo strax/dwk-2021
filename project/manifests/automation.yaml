@@ -126,3 +126,4 @@ spec:
         [ci skip]
     push:
       branch: main
+  suspend: true
