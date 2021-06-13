@@ -70,6 +70,23 @@ spec:
     numerical:
       order: asc
 ---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: github-credentials
+  namespace: dwk-project
+spec:
+  encryptedData:
+    password: AgCnvlTDeKfmkOHkQUvn/z4J8FVlkyeAk85JHphWQLHp39npi+wPLNNfciN0WL2fRsFiXH7T2R8eTnMLfxhQeuoINOxjUTDWskP7L+aRoVpaVXTYNMSfGtSedYfoFfJbn4WbjM55+zyr45jpeVa5oIgFNaWGYgauOhT3Hbw8ztY0zqDE560cvpLwO6O4w1VdmAQgoGsXiBaIjn+cIC0YTx/luVsc1piRWS3aMKqu426ND5X9EWAy1RXv+sm8PcLtAXCkcHxIkVDDFQtMYVa/wjjOdkXxffdYWUcf9Psi/2smWIx672WvrDrUu5OhdEgZhHj2JbhfKz9Wolusah9sjDQgoHwnNd66BM0x29Y/tPx1JDEymgq/vVc8FlP4nOLx7syr/1jTuhNzvPUAshMcprmGNz0LsElP36kAW978m5RRQDG6zZqO/mFv2o6HjbCaOutHqvPxEGnPVQaWZ+1xmiNzbCiv5V/YNpgCueWAol6rbFC/m9QbyeI7g0fPyQKjH7WsJNYGVsFfcrjTnjdWF3usNlbc3+MZMME9+jmzU940qoVDQYpuaLNsPLZRcCvgNs8fUz3Vbg5D0d2aHHlxP1NZTOVL/nwN8bx3kAf/qufb0vqwieRrDZ+jQgAUuf57fBiAV2ideoEW2MtxI1yYHMpYpx/1r7MqWzywxgWYtf8HpsKEOf6NG8+kxDFe+cEoYbB34TTAcvqTzga7opgjEzUyNwR2ZK3wMACcWXU0i6R5CvItX1y7y2S0
+    username: AgBU6U/YlspfOL+VLKmWZophulQAaL3sV9dzYaliU+DrOBMLvjDaIji4Nu7thB+1GSGuJM9ZHFWdJZM3zvWlZokeis33ITNtm3biNR4sR2EvCJa9tC6YNadbDk8/QM24tlP0cwalRtQw17tlZn+7U0Fqvnys5KKSTWzJhrrSq/FnFuU8enFDrLeZGhBhx7WlzdH0K/Va5aIOIghUu4PIfgFTftXOy3fKb3exYZFVXhlSr5iEjSKzIMvgi27pasUP/749yOesch0rjyewrgERhHkIYxBCs6+Y+V4OEzuQVHzT/PkXOptpiivtJwax/vmkHUOkbhJ1tkRrkqNjqt4vuVKuHdjpcsLPn8VWM4XVH8hXO8A+zocr43QALGOw01sgGOjkOJDP9Fe9USn1YMxyJA45yGKJuvqm1Xd9XcSXlr+EqImy9ng10OTUlf5k2hTRn0ypHAadyYxNxaXdkMZWqLasb67eyoxaiSfclZbvIn5Hrhb8QW0fDyi3lPt5ZJZ7XaPgRbRzq7UX19I9LfW54kUvscCpCt36nQ9zzLYHuhmiGYUtTY0kmqylfLz+0TdGLa3aQ9GGGUamuid7m92PaKYvoTPXdHqS7w/XO7WpjsJiSsa7baEXa95wWBXs7CjWaNoO68Q1G+RA3mdu6sRKjN+9Sj7Z9M8NL9Q2WBgZBOGA5+21XzjQjRS1Xc2EL8JjSMeDFRn4Fw==
+  template:
+    data: null
+    metadata:
+      creationTimestamp: null
+      name: github-credentials
+      namespace: dwk-project
+---
 apiVersion: source.toolkit.fluxcd.io/v1beta1
 kind: GitRepository
 metadata:
@@ -78,6 +95,8 @@ metadata:
 spec:
   interval: 1m
   url: https://github.com/strax/dwk-2021
+  secretRef:
+    name: github-credentials
   ref:
     branch: main
 ---
