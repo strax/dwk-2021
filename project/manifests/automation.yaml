@@ -7,6 +7,21 @@ spec:
   interval: 1m
   image: ghcr.io/strax/dwk-project-frontend
 ---
+apiVersion: image.toolkit.fluxcd.io/v1alpha2
+kind: ImagePolicy
+metadata:
+  name: frontend
+  namespace: dwk-project
+spec:
+  imageRepositoryRef:
+    name: frontend
+  filterTags:
+    pattern: 'main-[a-f0-9]+-(?P<ts>[0-9]+)'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
+---
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
 metadata:
@@ -15,6 +30,21 @@ metadata:
 spec:
   interval: 1m
   image: ghcr.io/strax/dwk-project-api
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha2
+kind: ImagePolicy
+metadata:
+  name: api
+  namespace: dwk-project
+spec:
+  imageRepositoryRef:
+    name: api
+  filterTags:
+    pattern: 'main-[a-f0-9]+-(?P<ts>[0-9]+)'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
 ---
 apiVersion: image.toolkit.fluxcd.io/v1alpha1
 kind: ImageRepository
@@ -25,3 +55,17 @@ spec:
   interval: 1m
   image: ghcr.io/strax/dwk-project-broadcaster
 ---
+apiVersion: image.toolkit.fluxcd.io/v1alpha2
+kind: ImagePolicy
+metadata:
+  name: broadcaster
+  namespace: dwk-project
+spec:
+  imageRepositoryRef:
+    name: broadcaster
+  filterTags:
+    pattern: 'main-[a-f0-9]+-(?P<ts>[0-9]+)'
+    extract: '$ts'
+  policy:
+    numerical:
+      order: asc
