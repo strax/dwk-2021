@@ -69,3 +69,41 @@ spec:
   policy:
     numerical:
       order: asc
+---
+apiVersion: source.toolkit.fluxcd.io/v1beta1
+kind: GitRepository
+metadata:
+  name: git
+  namespace: dwk-project
+spec:
+  interval: 1m
+  url: https://github.com/strax/dwk-2021
+  ref:
+    branch: main
+---
+apiVersion: image.toolkit.fluxcd.io/v1alpha2
+kind: ImageUpdateAutomation
+metadata:
+  name: automation
+  namespace: dwk-project
+spec:
+  sourceRef:
+    kind: GitRepository
+    name: git
+  interval: 1m
+  update:
+    strategy: Setters
+    path: ./project
+  git:
+    checkout:
+      ref:
+        branch: main
+    commit:
+      author:
+        name: fluxcdbot
+        email: fluxcdbot@users.noreply.github.com
+      messageTemplate: |
+        An automated update from FluxBot
+        [ci skip]
+    push:
+      branch: main
