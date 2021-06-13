@@ -43,9 +43,6 @@ jobs:
           echo "digest: $DIGEST"
   build-api-image:
     name: "api: build and push"
-    outputs:
-      image: ${{ steps.build-push.outputs.image }}
-      digest: ${{ steps.build-push.outputs.digest }}
     permissions:
       packages: write
       contents: read
@@ -55,6 +52,40 @@ jobs:
     defaults:
       run:
         working-directory: project/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Log into registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - id: build-push
+        name: Build image and push to registry
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          IMAGE_TAG="${BRANCH_NAME}-${SHORT_SHA}-$(date +%s)"
+          IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
+          docker build \
+            --tag "$IMAGE_ID:$IMAGE_TAG" \
+            --cache-from "$IMAGE_ID" \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --label org.opencontainers.image.revision="$GITHUB_SHA" \
+            .
+          docker push "$IMAGE_ID:$IMAGE_TAG"
+          docker tag "$IMAGE_ID:$IMAGE_TAG" "$IMAGE_ID:$BRANCH_NAME"
+          docker push "$IMAGE_ID:$BRANCH_NAME"
+          DIGEST=$(skopeo inspect "docker://$IMAGE_ID:$IMAGE_TAG" -f "{{.Digest}}")
+          echo "digest: $DIGEST"
+  build-broadcaster-image:
+    name: "broadcaster: build and push"
+    permissions:
+      packages: write
+      contents: read
+    runs-on: ubuntu-latest
+    env:
+      IMAGE_NAME: dwk-project-broadcaster
+    defaults:
+      run:
+        working-directory: project/broadcaster
     steps:
       - name: Checkout
         uses: actions/checkout@v2
