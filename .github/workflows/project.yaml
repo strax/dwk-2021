@@ -5,16 +5,10 @@ concurrency:
   group: ${{ github.ref }}
   cancel-in-progress: true
 env:
-  GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
-  GKE_CLUSTER: ${{ secrets.GKE_CLUSTER }}
-  GKE_ZONE: ${{ secrets.GKE_ZONE }}
   DOCKER_BUILDKIT: 1
 jobs:
   build-frontend-image:
     name: "frontend: build and push"
-    outputs:
-      image: ${{ steps.build-push.outputs.image }}
-      digest: ${{ steps.build-push.outputs.digest }}
     permissions:
       packages: write
       contents: read
@@ -32,11 +26,7 @@ jobs:
       - id: build-push
         name: Build image and push to registry
         run: |
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            IMAGE_TAG="latest"
-          else
-            IMAGE_TAG="${GITHUB_REF#refs/heads/}"
-          fi
+          IMAGE_TAG="${GITHUB_REF#refs/heads/}"
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           docker build \
             --tag "$IMAGE_ID:$IMAGE_TAG" \
@@ -46,8 +36,7 @@ jobs:
             .
           docker push "$IMAGE_ID:$IMAGE_TAG"
           DIGEST=$(skopeo inspect "docker://$IMAGE_ID:$IMAGE_TAG" -f "{{.Digest}}")
-          echo "::set-output name=image::$IMAGE_ID"
-          echo "::set-output name=digest::$DIGEST"
+          echo "digest: $DIGEST"
   build-api-image:
     name: "api: build and push"
     outputs:
@@ -70,11 +59,7 @@ jobs:
       - id: build-push
         name: Build image and push to registry
         run: |
-          if [[ "$GITHUB_REF" == "refs/heads/main" ]]; then
-            IMAGE_TAG="latest"
-          else
-            IMAGE_TAG="${GITHUB_REF#refs/heads/}"
-          fi
+          IMAGE_TAG="${GITHUB_REF#refs/heads/}"
           IMAGE_ID=ghcr.io/${{ github.repository_owner }}/$IMAGE_NAME
           docker build \
             --tag "$IMAGE_ID:$IMAGE_TAG" \
@@ -84,38 +69,4 @@ jobs:
             .
           docker push "$IMAGE_ID:$IMAGE_TAG"
           DIGEST=$(skopeo inspect "docker://$IMAGE_ID:$IMAGE_TAG" -f "{{.Digest}}")
-          echo "::set-output name=image::$IMAGE_ID"
-          echo "::set-output name=digest::$DIGEST"
-  gke:
-    name: "Deploy to GKE"
-    needs: [build-frontend-image, build-api-image]
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: project
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - uses: google-github-actions/setup-gcloud@master
-        with:
-          service_account_key: ${{ secrets.GCP_SA_KEY }}
-          project_id: ${{ secrets.GCP_PROJECT_ID }}
-          export_default_credentials: true
-      - run: gcloud container clusters get-credentials "$GKE_CLUSTER" --zone "$GKE_ZONE"
-      - name: Setup Kustomize
-        run: |
-          curl -sfLo- https://github.com/kubernetes-sigs/kustomize/releases/download/kustomize%2Fv4.1.3/kustomize_v4.1.3_linux_amd64.tar.gz | tar -xz
-          ./kustomize version
-      - if: ${{ github.ref != 'refs/heads/main' }}
-        name: Customize namespace
-        run: |
-          NAMESPACE="dwk-project-${GITHUB_REF#refs/heads/}"
-          kubectl create namespace "$NAMESPACE" --dry-run=client -o json | kubectl apply -f /dev/stdin
-          ./kustomize edit set namespace "$NAMESPACE"
-          kubectl get secret api-secret --namespace=dwk-project -o json | jq '.metadata.namespace = env.NAMESPACE' | kubectl create -f /dev/stdin --namespace="$NAMESPACE" || true
-          kubectl config set-context --current --namespace="$NAMESPACE"
-      - name: Deploy
-        run: |
-          ./kustomize edit set image ${{ needs.build-frontend-image.outputs.image }}@${{ needs.build-frontend-image.outputs.digest }}
-          ./kustomize edit set image ${{ needs.build-api-image.outputs.image }}@${{ needs.build-api-image.outputs.digest }}
-          kubectl apply -k .
+          echo "digest: $DIGEST"
