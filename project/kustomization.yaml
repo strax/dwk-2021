@@ -22,4 +22,4 @@ images:
 - name: ghcr.io/strax/dwk-project-frontend
   newTag: main-c8e274d-1623597262 # {"$imagepolicy": "dwk-project:frontend:tag"}
 - name: ghcr.io/strax/dwk-project-broadcaster
-  newTag: main-c8e274d-1623597261 # {"$imagepolicy": "dwk-project:broadcaster:tag"}
+  newTag: main-aa78b07-1623597871 # {"$imagepolicy": "dwk-project:broadcaster:tag"}
