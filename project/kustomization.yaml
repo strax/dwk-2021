@@ -18,5 +18,8 @@ resources:
 - broadcaster/manifests/deployment.yaml
 images:
 - name: ghcr.io/strax/dwk-project-api
+  newTag: main # {"$imagepolicy": "dwk-project:api:tag"}
 - name: ghcr.io/strax/dwk-project-frontend
+  newTag: main # {"$imagepolicy": "dwk-project:frontend:tag"}
 - name: ghcr.io/strax/dwk-project-broadcaster
+  newTag: main # {"$imagepolicy": "dwk-project:broadcaster:tag"}
