@@ -1,35 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: dwk-project
   name: broadcaster
+  namespace: dwk-project
 spec:
   selector:
     matchLabels:
       app: broadcaster
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: broadcaster
     spec:
       containers:
-        - name: broadcaster
-          image: ghcr.io/strax/dwk-project-broadcaster
-          env:
-            - name: TELEGRAM_API_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: telegram-api-token
-                  key: token
-            - name: TELEGRAM_CHANNEL_ID
-              valueFrom:
-                secretKeyRef:
-                  name: telegram-channel-id
-                  key: id
-          envFrom:
-            - configMapRef:
-                name: broadcaster-config
-          resources:
-            limits:
-              cpu: "100m"
-              memory: "128Mi"
+      - env:
+        - name: TELEGRAM_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              key: token
+              name: telegram-api-token
+        - name: TELEGRAM_CHANNEL_ID
+          valueFrom:
+            secretKeyRef:
+              key: id
+              name: telegram-channel-id
+        envFrom:
+        - configMapRef:
+            name: broadcaster-config
+        image: ghcr.io/strax/dwk-project-broadcaster
+        name: broadcaster
+        resources:
+          limits:
+            cpu: 100m
+            memory: 128Mi
+---

@@ -1,21 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: dwk-project
   name: frontend
+  namespace: dwk-project
 spec:
   selector:
     matchLabels:
       app: frontend
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: frontend
     spec:
       containers:
-        - name: nginx
-          image: ghcr.io/strax/dwk-project-frontend
-          resources:
-            limits:
-              cpu: "150m"
-              memory: "256Mi"
+      - image: ghcr.io/strax/dwk-project-frontend
+        name: nginx
+        resources:
+          limits:
+            cpu: 150m
+            memory: 256Mi
+---

@@ -1,40 +1,43 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  namespace: dwk-project
   name: api
+  namespace: dwk-project
 spec:
   selector:
     matchLabels:
       app: api
+  strategy:
+    type: Recreate
   template:
     metadata:
+      annotations:
+        linkerd.io/inject: enabled
       labels:
         app: api
     spec:
-      volumes:
-        - name: volume1
-          persistentVolumeClaim:
-            claimName: project-pvc
-            readOnly: true
       containers:
-        - name: api
-          image: ghcr.io/strax/dwk-project-api
-          volumeMounts:
-            - mountPath: /mnt/volume1
-              name: volume1
-          envFrom:
-            - configMapRef:
-                name: api-config
-            - secretRef:
-                name: api-secret
-          readinessProbe:
-            httpGet:
-              port: 80
-              path: /healthz
-          resources:
-            limits:
-              cpu: "100m"
-              memory: "256Mi"
-  strategy:
-    type: Recreate
+      - envFrom:
+        - configMapRef:
+            name: api-config
+        - secretRef:
+            name: api-secret
+        image: ghcr.io/strax/dwk-project-api
+        name: api
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 80
+        resources:
+          limits:
+            cpu: 100m
+            memory: 256Mi
+        volumeMounts:
+        - mountPath: /mnt/volume1
+          name: volume1
+      volumes:
+      - name: volume1
+        persistentVolumeClaim:
+          claimName: project-pvc
+          readOnly: true
+---
