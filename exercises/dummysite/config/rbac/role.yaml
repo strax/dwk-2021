@@ -1,0 +1,56 @@
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dummysite.strax.xyz
+  resources:
+  - dummysites
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - dummysite.strax.xyz
+  resources:
+  - dummysites/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - dummysite.strax.xyz
+  resources:
+  - dummysites/status
+  verbs:
+  - get
+  - patch
+  - update

@@ -1,0 +1,16 @@
+domain: strax.xyz
+layout:
+- go.kubebuilder.io/v3
+projectName: dummysite
+repo: github.com/strax/dwk-2021/exercises/dummysite
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: strax.xyz
+  group: dummysite
+  kind: DummySite
+  path: github.com/strax/dwk-2021/exercises/dummysite/api/v1
+  version: v1
+version: "3"

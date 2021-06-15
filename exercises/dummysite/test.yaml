@@ -1,0 +1,53 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mirroring-test
+spec:
+  selector:
+    matchLabels:
+      app: mirroring-test
+  template:
+    metadata:
+      labels:
+        app: mirroring-test
+    spec:
+      volumes:
+        - name: mirror
+          emptyDir:
+            medium: ""
+      containers:
+        - name: nginx
+          image: nginx
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "256m"
+          volumeMounts:
+            - mountPath: /usr/share/nginx/html
+              name: mirror
+      initContainers:
+        - name: wget
+          image: jgoclawski/wget
+          env:
+            - name: MIRROR_URL
+              value: https://example.com
+          volumeMounts:
+            - mountPath: /mirror
+              name: mirror
+          command: ["wget"]
+          args: ["--mirror", "--directory-prefix=/mirror", "--no-host-directories", "--convert-links", "--adjust-extension", "--page-requisites", "--no-parent", "$(MIRROR_URL)"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mirroring-test
+spec:
+  type: ClusterIP
+  selector:
+    app: mirroring-test
+  ports:
+    - name: http
+      port: 80
+      protocol: TCP
+      targetPort: 80
