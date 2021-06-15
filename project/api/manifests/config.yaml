@@ -10,7 +10,7 @@ data:
   PGUSER: todos
   PGDATABASE: todos
   PATH_PREFIX: "/api"
-  NATS_URL: nats://dwk-project-nats:4222
+  NATS_URL: nats://nats:4222
 ---
 apiVersion: bitnami.com/v1alpha1
 kind: SealedSecret
