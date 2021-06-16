@@ -1,0 +1,39 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: pingpong
+spec:
+  template:
+    metadata:
+      name: pingpong-v1 # v1
+    spec:
+      containers:
+        - image: eu.gcr.io/strax-dwk/pingpong
+          envFrom:
+            - secretRef:
+                name: pingpong-secret
+          env:
+            - name: PGHOST
+              valueFrom:
+                configMapKeyRef:
+                  name: pingpong-config
+                  key: PGHOST
+            - name: PGPORT
+              valueFrom:
+                configMapKeyRef:
+                  name: pingpong-config
+                  key: PGPORT
+            - name: PGUSER
+              valueFrom:
+                configMapKeyRef:
+                  name: pingpong-config
+                  key: PGUSER
+            - name: PGDATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: pingpong-config
+                  key: PGDATABASE
+          resources:
+            limits:
+              cpu: "150m"
+              memory: "100Mi"
